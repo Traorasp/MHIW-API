@@ -5,6 +5,7 @@ const {body, validationResult} = require('express-validator');
 const passport = require('passport');
 const jwt = require('jsonwebtoken');
 
+// Authorizes users to log in and sends back a jwt token
 exports.login_post = (req, res, next) => {
     passport.authenticate('local', {session: false}, (err, user, info) => {
         if(err|| !user) {
@@ -22,6 +23,7 @@ exports.login_post = (req, res, next) => {
     })(req, res);
 };
 
+// Allows users to register and make an acount
 exports.register_post = [
     body('username', 'Username cannot be empty')
         .trim()

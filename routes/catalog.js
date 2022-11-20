@@ -13,7 +13,4 @@ router.post('/', userCont.login_post);
 // POST request for register
 router.post('/register', userCont.register_post);
 
-// POST request for sign out
-router.post('/logout', userCont.logout_post);
-
 module.exports = router;

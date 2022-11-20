@@ -6,7 +6,8 @@ const UserSchema = new Schema({
     username: {type: String, required: true, minLength: 1, maxLength: 20},
     password: {type: String, required: true, minLength: 6},
     characters: [ Schema.Types.ObjectId],
-    profilePic: {data: Buffer, contentType: String}
+    profilePic: {data: Buffer, contentType: String},
+    friends: [Schema.Types.ObjectId],
 });
 
 // Virtual for user's URL
