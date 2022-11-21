@@ -14,7 +14,7 @@ exports.login_post = (req, res, next) => {
                 user
             })
         }
-       
+
         req.login(user, {session: false}, (err) => {
             if(err) res.next(err);
             const token = jwt.sign({user}, 'cats');
@@ -50,7 +50,7 @@ exports.register_post = [
 
         bcrypt.hash(req.body.password, 12, (err, hashedPassword) => {
             if(err) return next(err);
-                
+
             const user = new User({
                 username: req.body.username,
                 password: hashedPassword        
@@ -61,4 +61,32 @@ exports.register_post = [
             });
             
         }
-]
+];
+
+exports.post_new_profile = (req, res, next) => {
+
+;}
+
+exports.post_send_friend_request = (req, res, next) => {
+
+};
+
+exports.get_friend_requests = (req, res, next) => {
+
+};
+
+exports.post_accept_friend_request = (req, res, next) => {
+
+};
+
+exports.get_friend_list = (req, res, next) => {
+    console.log("wa");
+    User.findById(req.params.id)
+        .exec(function(err, user) {
+            if(user == null) {
+                return res.json({msg: "User doesn't exist"});
+            }
+            if(err) next(err);
+            res.json(user.friends)
+        })
+};

@@ -8,13 +8,14 @@ function verifyToken(req, res, next) {
     if(typeof bearerHeader !== "undefined") {
 
         const bearer = bearerHeader.split(' ');
-
         const bearerToken = bearer[1];
 
         req.token = bearerToken;
-
+        console.log("token")
         next();
     } else {
-        res.senStatus(403);
+        res.senStatus(403).json({msg: 'Not signed in'});
     }
 }
+
+module.exports = verifyToken;
