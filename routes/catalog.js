@@ -1,25 +1,21 @@
-var express = require('express');
-var router = express.Router();
-const verifyToken = require('../verifyToken');
+const express = require('express');
+
+const router = express.Router();
 
 // Requires controllers
 
 const userCont = require('../controllers/userController');
 
-// verifies if user is loogged in for all but register and signin page
-router.get(/([^e-t]{8}|[^\/]$)/, verifyToken);
-router.post(/([^e-t]{8}|[^\/]$)/, verifyToken);
-
 /// USER ROUTES ///
 
-// POST request for login in 
+// POST request for login in
 router.post('/', userCont.login_post);
 
 // POST request for register
 router.post('/register', userCont.register_post);
 
 // POST a new profile picture
-router.post('/profile', userCont.post_new_profile);
+router.post('/profile/:id', userCont.post_new_profile);
 
 // POST friend request to another user
 router.post('/friend/request', userCont.post_send_friend_request);
