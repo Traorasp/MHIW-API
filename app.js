@@ -11,7 +11,6 @@ const JWTStrategy = require('passport-jwt').Strategy;
 const extractJWT = require('passport-jwt').ExtractJwt;
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
-const Grid = require('gridfs-stream');
 const methodOverride = require('method-override');
 const bodyParser = require('body-parser');
 const User = require('./models/user');
@@ -23,14 +22,14 @@ mongoose.connect(process.env.MONGOKEY, { useNewUrlParser: true, useUnifiedTopolo
 const db = mongoose.connection;
 db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 
-// Initializes grid fs
+const app = express();
+
+// Initializes GridFSBuckets
 let gfs;
 db.once('open', () => {
-  gfs = Grid(db.db, mongoose.mongo);
-  gfs.collection('images');
+  gfs = new mongoose.mongo.GridFSBucket(db.db, { bucketName: 'images' });
+  app.locals.gfs = gfs;
 });
-
-const app = express();
 
 // Initializes passport Local Strategy
 passport.use(

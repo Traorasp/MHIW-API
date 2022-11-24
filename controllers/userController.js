@@ -2,8 +2,10 @@ const bcrypt = require('bcrypt');
 const { body, validationResult } = require('express-validator');
 const passport = require('passport');
 const jwt = require('jsonwebtoken');
+const { json } = require('express');
 const upload = require('../config.js/upload');
 const User = require('../models/user');
+const { find } = require('../models/user');
 
 // Authorizes users to log in and sends back a jwt token
 exports.login_post = (req, res, next) => {
@@ -74,6 +76,7 @@ exports.post_new_profile = [
         if (!user) {
           return res.json({ msg: 'User doesn\'t exist' });
         }
+        req.app.locals.gfs.delete(user.profilePic, () => {});
         user.profilePic = req.file.id;
         user.save(() => {
           if (err) return next(err);
@@ -82,6 +85,20 @@ exports.post_new_profile = [
       });
   },
 ];
+
+exports.get_profile = (req, res, next) => {
+  req.app.locals.gfs.find().toArray((err, images) => {
+    if (!images || images.length === 0) {
+      return res.status(400).json({ msg: 'No profile exists' });
+    }
+
+    const img = images.find((image) => image._id == req.params.id);
+    if (!img) {
+      return res.status(400).json({ msg: 'No profile exists' });
+    }
+    return res.json(img);
+  });
+};
 
 exports.post_send_friend_request = (req, res, next) => {
 

@@ -17,6 +17,9 @@ router.post('/register', userCont.register_post);
 // POST a new profile picture
 router.post('/profile/:id', userCont.post_new_profile);
 
+// Get profile picture
+router.get('/profile/:id', userCont.get_profile);
+
 // POST friend request to another user
 router.post('/friend/request', userCont.post_send_friend_request);
 

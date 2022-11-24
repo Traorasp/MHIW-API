@@ -11,6 +11,9 @@ const storage = new GridFsStorage({
       if (err) {
         return reject(err);
       }
+      if (file.mimetype !== 'image/png' && file.mimetype !== 'image/jpeg') {
+        return reject(new Error('Only JPEG and PNGare allowed'));
+      }
       const filename = buf.toString('hex') + path.extname(file.originalname);
       const fileInfo = {
         filename,
