@@ -7,7 +7,8 @@ const upload = require('../config.js/upload');
 const User = require('../models/user');
 const { find } = require('../models/user');
 
-// Authorizes users to log in and sends back a jwt token
+// Authorizes users to log in
+// Sends back user info and jwt token
 exports.login_post = (req, res, next) => {
   passport.authenticate('local', { session: false }, (err, user) => {
     if (err || !user) {
@@ -25,7 +26,7 @@ exports.login_post = (req, res, next) => {
   })(req, res);
 };
 
-// Allows users to register and make an acount
+// Allows users to register and make an acount, encrypts password with bcrypt
 exports.register_post = [
   body('username', 'Username cannot be empty')
     .trim()
@@ -64,6 +65,7 @@ exports.register_post = [
   },
 ];
 
+// Lets user updater their profile picture
 exports.post_new_profile = [
   upload.single('profile-file'),
   (req, res, next) => {
@@ -80,12 +82,13 @@ exports.post_new_profile = [
         user.profilePic = req.file.id;
         user.save(() => {
           if (err) return next(err);
-          return res.json({ msg: 'Sucesfully changed profile', user });
+          return res.json({ msg: 'Sucesfully changed profile' });
         });
       });
   },
 ];
 
+// Gets profile pictutre of user
 exports.get_profile = (req, res, next) => {
   req.app.locals.gfs.find().toArray((err, images) => {
     if (!images || images.length === 0) {
@@ -101,24 +104,130 @@ exports.get_profile = (req, res, next) => {
 };
 
 exports.post_send_friend_request = (req, res, next) => {
-
+  User.findById(req.params.id)
+    .exec((err, user) => {
+      const idOfRequester = req.body.id;
+      if (user == null) {
+        return res.json({ msg: "User doesn't exist" });
+      }
+      if (err) next(err);
+      if (user.friendRequests.find((request) => request == idOfRequester)) {
+        return res.json({ msg: 'You have already sent a friend request to this user' });
+      }
+      user.friendRequests = [...user.friendRequests, idOfRequester];
+      user.save(() => {
+        if (err) return next(err);
+        return res.json({ msg: 'Sucesfully sent request' });
+      });
+    });
 };
 
+// Returns a list of users received friend requests
 exports.get_friend_requests = (req, res, next) => {
-
+  User.findById(req.params.id)
+    .populate('friendRequests')
+    .exec((err, user) => {
+      if (user == null) {
+        return res.json({ msg: "User doesn't exist" });
+      }
+      if (err) next(err);
+      return res.json(user.friendRequests);
+    });
 };
 
+// Allows user to accept a friend request, movest request to friends
+// list and adds user to requesters friend list
 exports.post_accept_friend_request = (req, res, next) => {
-
+  User.findById(req.params.id)
+    .exec((err, user) => {
+      const idOfRequester = req.body.id;
+      if (user == null) {
+        return res.json({ msg: "User doesn't exist" });
+      }
+      if (err) next(err);
+      const index = user.friendRequests.indexOf(idOfRequester);
+      if (index >= 0) {
+        user.friends = [...user.friends, idOfRequester];
+        user.friendRequests.splice(index, 1);
+        // Adds requestee to requesters friend list
+        User.findById(req.body.id)
+          .exec((err, user) => {
+            user.friendRequests.splice(user.friendRequests.indexOf(req.params.id), 1);
+            user.friends = [...user.friends, req.params.id];
+            user.save(() => {
+              if (err) return next(err);
+            });
+          });
+        user.save(() => {
+          if (err) return next(err);
+          return res.json({ msg: 'Sucesfully accepter request' });
+        });
+      } else {
+        return res.json({ msg: 'No friend request from this user' });
+      }
+    });
 };
 
+// Returns a list of users friends
 exports.get_friend_list = (req, res, next) => {
   User.findById(req.params.id)
+    .populate('friends')
     .exec((err, user) => {
       if (user == null) {
         return res.json({ msg: "User doesn't exist" });
       }
       if (err) next(err);
       return res.json(user.friends);
+    });
+};
+
+// Removes a friend from users list and user from friends list
+exports.delete_friend = (req, res, next) => {
+  User.findById(req.params.id)
+    .exec((err, user) => {
+      if (user == null) {
+        return res.json({ msg: "User doesn't exist" });
+      }
+      if (err) next(err);
+      const index = user.friends.indexOf(req.body.id);
+      if (index > -1) {
+        user.friends.splice(index, 1);
+        // Remove this user from exfriend friends list
+        User.findById(req.body.id)
+          .exec((err, user) => {
+            user.friends.splice(user.friends.indexOf(req.params.id), 1);
+            user.save(() => {
+              if (err) return next(err);
+            });
+          });
+        user.save(() => {
+          if (err) return next(err);
+          return res.json({ msg: 'Sucesfully removed friend' });
+        });
+      } else {
+        return res.json({ msg: 'No friend with this id' });
+      }
+    });
+};
+
+// Removes a friend request from users list
+exports.delete_friend_request = (req, res, next) => {
+  User.findById(req.params.id)
+    .exec((err, user) => {
+      if (user == null) {
+        return res.json({ msg: "User doesn't exist" });
+      }
+      if (err) next(err);
+
+      const index = user.friendRequests.indexOf(req.body.id);
+      if (index > -1) {
+        user.friendRequests.splice(index, 1);
+        user.save(() => {
+          if (err) return next(err);
+          return res.json({ msg: 'Sucesfully declined friend request' });
+        });
+      } else {
+        return res.json({ msg: 'No friend request from this user' });
+      }
     });
 };

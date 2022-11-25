@@ -9,13 +9,8 @@ const UserSchema = new Schema({
   password: { type: String, required: true, minLength: 6 },
   characters: [Schema.Types.ObjectId],
   profilePic: { type: Schema.Types.ObjectId, ref: 'images.files' },
-  friends: [Schema.Types.ObjectId],
-  friendRequests: [Schema.Types.ObjectId],
-});
-
-// Virtual for user's URL
-UserSchema.virtual('url').get(function () {
-  return `/catalog/user/${this._id}`;
+  friends: [{ type: Schema.Types.ObjectId, ref: 'User' }],
+  friendRequests: [{ type: Schema.Types.ObjectId, ref: 'User' }],
 });
 
 module.exports = mongoose.model('User', UserSchema);
