@@ -2,10 +2,8 @@ const bcrypt = require('bcrypt');
 const { body, validationResult } = require('express-validator');
 const passport = require('passport');
 const jwt = require('jsonwebtoken');
-const { json } = require('express');
 const upload = require('../config.js/upload');
 const User = require('../models/user');
-const { find } = require('../models/user');
 
 // Authorizes users to log in
 // Sends back user info and jwt token

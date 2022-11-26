@@ -5,6 +5,7 @@ const router = express.Router();
 // Requires controllers
 
 const userCont = require('../controllers/userController');
+const charCont = require('../controllers/characterControllers');
 
 /// USER ROUTES ///
 
@@ -38,5 +39,22 @@ router.delete('/friend/remove/:id', userCont.delete_friend);
 
 // DELETE a friend request from users list
 router.delete('/friend/request/remove/:id', userCont.delete_friend_request);
+
+/// CHARACTER ROUTES ////
+
+// GET detailed info of a character from users character list
+router.get('/character/:id', charCont.get_character);
+
+// GET basic info of all of users characters
+router.get('/characters', charCont.get_character_list);
+
+// POST to create a new character
+router.post('/character', charCont.post_create_character);
+
+// POST to update a character in users character list
+router.post('/character/update', charCont.post_update_character);
+
+// DELETE a caracter from usrs character list
+router.delete('/character/:id', charCont.delete_character);
 
 module.exports = router;
