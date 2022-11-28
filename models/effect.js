@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const { Schema } = mongoose.Schema;
+const { Schema } = mongoose;
 
 const effectSchema = new Schema({
   name: { type: String, require: true, minLength: 1 },
