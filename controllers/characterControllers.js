@@ -1,7 +1,5 @@
 const { body, validationResult } = require('express-validator');
-const async = require('async');
 const Character = require('../models/character');
-const User = require('../models/user');
 const upload = require('../config.js/upload');
 
 // Get detailed info of one character

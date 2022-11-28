@@ -4,8 +4,9 @@ const router = express.Router();
 
 // Requires controllers
 
-const userCont = require('../controllers/userController');
+const userCont = require('../controllers/userControllers');
 const charCont = require('../controllers/characterControllers');
+const effectCont = require('../models/effect');
 
 /// USER ROUTES ///
 
@@ -56,5 +57,16 @@ router.post('/character/update', charCont.post_update_character);
 
 // DELETE a caracter from usrs character list
 router.delete('/character/:id', charCont.delete_character);
+
+/// EFFECT ROUTES ///
+
+// GET info of all existing effects
+router.get('/effects', effectCont.);
+
+// POST to create a new effect 
+router.post('/effect', effectCont.);
+
+// DELETE an existing effect
+router.delete('/effect', effectCont.);
 
 module.exports = router;
