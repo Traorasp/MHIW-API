@@ -7,6 +7,7 @@ const router = express.Router();
 const userCont = require('../controllers/userControllers');
 const charCont = require('../controllers/characterControllers');
 const effectCont = require('../controllers/effectControllers');
+const materCont = require('../controllers/materialControllers');
 
 /// USER ROUTES ///
 
@@ -68,5 +69,22 @@ router.post('/effect', effectCont.post_effect);
 
 // DELETE an existing effect
 router.delete('/effect', effectCont.delete_effect);
+
+/// MATERIAL ROUTES ///
+
+// GET details of a specific material
+router.get('/material/:id', materCont.get_material_details);
+
+// GET list of all materials
+router.get('/materials', materCont.get_material_list);
+
+// POST a new material if it dpesn't already exist
+router.post('/material', materCont.post_material);
+
+// POST update a material if exact one doesn't alreayd exist
+router.post('/material/update', materCont.post_update_material);
+
+// DELETE a material and its references
+router.delete('/material/:id', materCont.delete_material);
 
 module.exports = router;
