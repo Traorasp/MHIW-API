@@ -2,6 +2,7 @@ const bcrypt = require('bcrypt');
 const { body, validationResult } = require('express-validator');
 const passport = require('passport');
 const jwt = require('jsonwebtoken');
+const { default: mongoose } = require('mongoose');
 const upload = require('../config.js/upload');
 const User = require('../models/user');
 
@@ -79,7 +80,10 @@ exports.post_new_profile = [
         req.app.locals.gfs.delete(user.profilePic, () => {});
         user.profilePic = req.file.id;
         user.save(() => {
-          if (err) return next(err);
+          if (err) {
+            req.app.locals.gfs.delete(req.file.id, () => {});
+            return next(err);
+          }
           return res.json({ msg: 'Sucesfully changed profile' });
         });
       });
@@ -88,16 +92,12 @@ exports.post_new_profile = [
 
 // Gets profile pictutre of user
 exports.get_profile = (req, res, next) => {
-  req.app.locals.gfs.find().toArray((err, images) => {
-    if (!images || images.length === 0) {
+  const _id = new mongoose.Types.ObjectId(req.params.id);
+  req.app.locals.gfs.find({ _id }).toArray((err, image) => {
+    if (!image) {
       return res.status(400).json({ msg: 'No profile exists' });
     }
-
-    const img = images.find((image) => image._id == req.params.id);
-    if (!img) {
-      return res.status(400).json({ msg: 'No profile exists' });
-    }
-    return res.json(img);
+    return req.app.locals.gfs.openDownloadStream(_id).pipe(res);
   });
 };
 
@@ -113,7 +113,7 @@ exports.post_send_friend_request = (req, res, next) => {
         return res.json({ msg: 'You have already sent a friend request to this user' });
       }
       user.friendRequests = [...user.friendRequests, idOfRequester];
-      user.save(() => {
+      user.save((err) => {
         if (err) return next(err);
         return res.json({ msg: 'Sucesfully sent request' });
       });
@@ -152,7 +152,7 @@ exports.post_accept_friend_request = (req, res, next) => {
           .exec((err, user) => {
             user.friendRequests.splice(user.friendRequests.indexOf(req.params.id), 1);
             user.friends = [...user.friends, req.params.id];
-            user.save(() => {
+            user.save((err) => {
               if (err) return next(err);
             });
           });
@@ -194,7 +194,7 @@ exports.delete_friend = (req, res, next) => {
         User.findById(req.body.id)
           .exec((err, user) => {
             user.friends.splice(user.friends.indexOf(req.params.id), 1);
-            user.save(() => {
+            user.save((err) => {
               if (err) return next(err);
             });
           });
@@ -220,7 +220,7 @@ exports.delete_friend_request = (req, res, next) => {
       const index = user.friendRequests.indexOf(req.body.id);
       if (index > -1) {
         user.friendRequests.splice(index, 1);
-        user.save(() => {
+        user.save((err) => {
           if (err) return next(err);
           return res.json({ msg: 'Sucesfully declined friend request' });
         });

@@ -75,6 +75,9 @@ router.delete('/effect', effectCont.delete_effect);
 // GET details of a specific material
 router.get('/material/:id', materCont.get_material_details);
 
+// GET image of a material, ID belongs to image file
+router.get('/material/image/:id', materCont.get_material_image);
+
 // GET list of all materials
 router.get('/materials', materCont.get_material_list);
 

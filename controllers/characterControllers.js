@@ -134,8 +134,10 @@ exports.post_update_character = [
         if (err) return next(err);
         if (!char) return res.json({ msg: 'Character doesn\'t exist' });
         if (char.owner != req.body.owner) return res.json({ msg: 'User doesn\'t own this character' });
+
         req.app.locals.gfs.delete(char.charImage, () => {});
         req.app.locals.gfs.delete(char.charIcon, () => {});
+
         const character = new Character(
           {
             _id: req.body.id,
@@ -176,7 +178,7 @@ exports.post_update_character = [
             background: req.body.background,
           },
         );
-        character.save(() => {
+        character.save((err) => {
           if (err) return res.json({ msg: 'Failed to save changes' });
           return res.json({ msg: 'Sucesfully updated character', character });
         });

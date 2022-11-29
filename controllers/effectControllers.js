@@ -76,7 +76,7 @@ exports.post_effect = [
             effect: req.body.effect,
             duration: req.body.duration,
           });
-          newEffect.save(() => {
+          newEffect.save((err) => {
             if (err) return next(err);
             return res.json({ newEffect, msg: 'Succesfully created new effect' });
           });
