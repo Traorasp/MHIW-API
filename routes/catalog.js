@@ -50,6 +50,9 @@ router.get('/character/:id', charCont.get_character);
 // GET basic info of all of users characters
 router.get('/characters', charCont.get_character_list);
 
+// GET character imge or icon
+router.get('/character/image/:id', charCont.get_character_image);
+
 // POST to create a new character
 router.post('/character', charCont.post_create_character);
 

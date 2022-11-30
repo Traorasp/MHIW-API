@@ -1,4 +1,5 @@
 const { body, validationResult } = require('express-validator');
+const { default: mongoose } = require('mongoose');
 const Character = require('../models/character');
 const upload = require('../config.js/upload');
 
@@ -18,6 +19,17 @@ exports.get_character = (req, res, next) => {
       });
       return res.json(char);
     });
+};
+
+// Get character icon or image
+exports.get_character_image = (req, res, next) => {
+  const _id = new mongoose.Types.ObjectId(req.params.id);
+  req.app.locals.gfs.find({ _id }).toArray((err, image) => {
+    if (!image) {
+      return res.status(400).json({ msg: 'No profile exists' });
+    }
+    return req.app.locals.gfs.openDownloadStream(_id).pipe(res);
+  });
 };
 
 // Get basic info of all users characters
@@ -138,49 +150,19 @@ exports.post_update_character = [
         req.app.locals.gfs.delete(char.charImage, () => {});
         req.app.locals.gfs.delete(char.charIcon, () => {});
 
-        const character = new Character(
-          {
-            _id: req.body.id,
-            owner: req.body.owner,
-            firstName: req.body.firstName,
-            lastName: req.body.lastName,
-            charImage: req.files.char[0].id,
-            charIcon: req.files.icon[0].id,
-            age: req.body.age,
-            nationality: req.body.nationality,
-            raceSkills: [...req.body.raceSkills],
-            race: req.body.race,
-            gender: req.body.gender,
-            level: req.body.level,
-            titles: [...req.body.titles],
-            magics: [...req.body.magics],
-            talents: [...req.body.talents],
-            unique: [...req.body.unique],
-            baseStats: {
-              maxHealth: req.body.maxHealth,
-              currHealth: req.body.currHealth,
-              defense: req.body.defense,
-              strength: req.body.strength,
-              speed: req.body.speed,
-              mana: req.body.mana,
-              accuracy: req.body.accuracy,
-              evasion: req.body.evasion,
-              charisma: req.body.charisma,
-              will: req.body.will,
-              intimidation: req.body.intimidation,
-            },
-            status: [...req.body.status],
-            skills: [...req.body.skills],
-            traits: [...req.body.traits],
-            class: [...req.body.class],
-            inventory: [...req.body.inventory],
-            description: req.body.description,
-            background: req.body.background,
-          },
-        );
-        character.save((err) => {
-          if (err) return res.json({ msg: 'Failed to save changes' });
-          return res.json({ msg: 'Sucesfully updated character', character });
+        for (const [key, value] of Object.entries(req.body)) {
+          if (req.body[key] != undefined && req.body[key] != []) {
+            char[key] = req.body[key];
+          }
+        }
+        if (req.files) {
+          char.charImage = req.files.char[0].id;
+          char.charIcon = req.files.icon[0].id;
+        }
+
+        char.save((err) => {
+          if (err) return res.json({ err, msg: 'Failed to save changes' });
+          return res.json({ msg: 'Sucesfully updated character', char });
         });
       });
   },
