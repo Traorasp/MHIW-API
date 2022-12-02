@@ -3,11 +3,26 @@ const express = require('express');
 const router = express.Router();
 
 // Requires controllers
-
+const imageCont = require('../controllers/imageControllers');
 const userCont = require('../controllers/userControllers');
 const charCont = require('../controllers/characterControllers');
 const effectCont = require('../controllers/effectControllers');
 const materCont = require('../controllers/materialControllers');
+const itemCont = require('../controllers/itemControllers');
+
+/// IMAGE Routes ///
+
+// GET image with its id
+router.get('/image/:id', imageCont.get_image);
+
+// POST a new image into the database
+router.post('/image', imageCont.post_image);
+
+// POST a new image and removes the old one
+router.post('/image/:id', imageCont.post_update_image);
+
+// DELETE an image with its id
+router.delete('/image/:id', imageCont.delete_image);
 
 /// USER ROUTES ///
 
@@ -17,12 +32,8 @@ router.post('/', userCont.login_post);
 // POST request for register
 router.post('/register', userCont.register_post);
 
-// POST a new profile picture
+// POST adds a profile to user
 router.post('/profile/:id', userCont.post_new_profile);
-
-// Get profile picture
-// :id is the id of the users profile
-router.get('/profile/:id', userCont.get_profile);
 
 // POST friend request to another user
 router.post('/friend/request/:id', userCont.post_send_friend_request);
@@ -50,9 +61,6 @@ router.get('/character/:id', charCont.get_character);
 // GET basic info of all of users characters
 router.get('/characters', charCont.get_character_list);
 
-// GET character imge or icon
-router.get('/character/image/:id', charCont.get_character_image);
-
 // POST to create a new character
 router.post('/character', charCont.post_create_character);
 
@@ -78,9 +86,6 @@ router.delete('/effect', effectCont.delete_effect);
 // GET details of a specific material
 router.get('/material/:id', materCont.get_material_details);
 
-// GET image of a material, ID belongs to image file
-router.get('/material/image/:id', materCont.get_material_image);
-
 // GET list of all materials
 router.get('/materials', materCont.get_material_list);
 
@@ -92,5 +97,22 @@ router.post('/material/update', materCont.post_update_material);
 
 // DELETE a material and its references
 router.delete('/material/:id', materCont.delete_material);
+
+/// ITEM ROUTES ///
+
+// GET details of an item
+router.get('/item/:id', itemCont.get_item_details);
+
+// GET list of all items
+router.get('/items', itemCont.get_item_list);
+
+// POST a new item
+router.post('/item', itemCont.post_item);
+
+// POST update an item
+router.post('/item/update', itemCont.post_update_item);
+
+// DELETE an item
+router.delete('/item/:id', itemCont.delete_item);
 
 module.exports = router;

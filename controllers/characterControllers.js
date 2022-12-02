@@ -1,14 +1,12 @@
 const { body, validationResult } = require('express-validator');
-const { default: mongoose } = require('mongoose');
 const Character = require('../models/character');
-const upload = require('../config.js/upload');
 
 // Get detailed info of one character
 // Only populates fields that aren't empty
 exports.get_character = (req, res, next) => {
   Character.findById(req.params.id)
     .exec((err, char) => {
-      if (!char) next(err);
+      if (!char) return res.json({ msg: 'Character does not exist' });
       Object.entries(char).forEach(([key, value]) => {
         if (Array.isArray(value) && value.length > 0) {
           char.populate(key);
@@ -19,17 +17,6 @@ exports.get_character = (req, res, next) => {
       });
       return res.json(char);
     });
-};
-
-// Get character icon or image
-exports.get_character_image = (req, res, next) => {
-  const _id = new mongoose.Types.ObjectId(req.params.id);
-  req.app.locals.gfs.find({ _id }).toArray((err, image) => {
-    if (!image) {
-      return res.status(400).json({ msg: 'No profile exists' });
-    }
-    return req.app.locals.gfs.openDownloadStream(_id).pipe(res);
-  });
 };
 
 // Get basic info of all users characters
@@ -78,7 +65,6 @@ exports.post_create_character = [
 
 // Allows user to update character details
 exports.post_update_character = [
-  upload.fields([{ name: 'char', maxcount: 1 }, { name: 'icon', maxcount: 1 }]),
   body('firstName', 'Character must have a first name')
     .trim()
     .isLength({ min: 1 })
@@ -146,19 +132,11 @@ exports.post_update_character = [
         if (err) return next(err);
         if (!char) return res.json({ msg: 'Character doesn\'t exist' });
         if (char.owner != req.body.owner) return res.json({ msg: 'User doesn\'t own this character' });
-
-        req.app.locals.gfs.delete(char.charImage, () => {});
-        req.app.locals.gfs.delete(char.charIcon, () => {});
-
-        for (const [key, value] of Object.entries(req.body)) {
+        Object.key(req.body).forEach((key) => {
           if (req.body[key] != undefined && req.body[key] != []) {
             char[key] = req.body[key];
           }
-        }
-        if (req.files) {
-          char.charImage = req.files.char[0].id;
-          char.charIcon = req.files.icon[0].id;
-        }
+        });
 
         char.save((err) => {
           if (err) return res.json({ err, msg: 'Failed to save changes' });

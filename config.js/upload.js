@@ -6,13 +6,11 @@ const { GridFsStorage } = require('multer-gridfs-storage');
 // Create storage engine
 const storage = new GridFsStorage({
   url: process.env.MONGOKEY,
+  options: { useUnifiedTopology: true },
   file: (req, file) => new Promise((resolve, reject) => {
     crypto.randomBytes(16, (err, buf) => {
       if (err) {
         return reject(err);
-      }
-      if (file.mimetype !== 'image/png' && file.mimetype !== 'image/jpeg') {
-        return reject(new Error('Only JPEG and PNGare allowed'));
       }
       const filename = buf.toString('hex') + path.extname(file.originalname);
       const fileInfo = {
@@ -24,4 +22,34 @@ const storage = new GridFsStorage({
   }),
 });
 
-module.exports = multer({ storage });
+const store = multer({
+  storage,
+  limits: { fileSize: 20000000 },
+  fileFilter(req, file, cb) {
+    checkFileType(file, cb);
+  },
+});
+
+function checkFileType(file, cb) {
+  const filetypes = /jpeg|jpg|png/;
+  const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+  const mimetype = filetypes.test(file.mimetype);
+
+  if (mimetype && extname) return cb(null, true);
+  cb('filetype');
+}
+
+module.exports = (req, res, next) => {
+  const upload = store.single('image');
+  upload(req, res, (err) => {
+    if (err instanceof multer.MulterError) {
+      return res.status(400).json({ msg: 'File too large' });
+    }
+    if (err) {
+      if (err === 'filetype') return res.status(400).json({ msg: 'Image files onlys' });
+
+      return res.sendStatus(500);
+    }
+    next();
+  });
+};

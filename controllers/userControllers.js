@@ -2,8 +2,6 @@ const bcrypt = require('bcrypt');
 const { body, validationResult } = require('express-validator');
 const passport = require('passport');
 const jwt = require('jsonwebtoken');
-const { default: mongoose } = require('mongoose');
-const upload = require('../config.js/upload');
 const User = require('../models/user');
 
 // Authorizes users to log in
@@ -65,40 +63,19 @@ exports.register_post = [
 ];
 
 // Lets user updater their profile picture
-exports.post_new_profile = [
-  upload.single('profile-file'),
-  (req, res, next) => {
-    if (!req.file) {
-      return res.json({ msg: 'No image attached' });
-    }
-    User.findById(req.params.id)
-      .exec((err, user) => {
+exports.post_new_profile = (req, res, next) => {
+  User.findById(req.params.id)
+    .exec((err, user) => {
+      if (err) return next(err);
+      if (!user) {
+        return res.json({ msg: 'User doesn\'t exist' });
+      }
+      user.profilePic = req.params.id;
+      user.save(() => {
         if (err) return next(err);
-        if (!user) {
-          return res.json({ msg: 'User doesn\'t exist' });
-        }
-        req.app.locals.gfs.delete(user.profilePic, () => {});
-        user.profilePic = req.file.id;
-        user.save(() => {
-          if (err) {
-            req.app.locals.gfs.delete(req.file.id, () => {});
-            return next(err);
-          }
-          return res.json({ msg: 'Sucesfully changed profile' });
-        });
+        return res.json({ imageId: req.params.id, msg: 'Sucesfully changed profile' });
       });
-  },
-];
-
-// Gets profile pictutre of user
-exports.get_profile = (req, res, next) => {
-  const _id = new mongoose.Types.ObjectId(req.params.id);
-  req.app.locals.gfs.find({ _id }).toArray((err, image) => {
-    if (!image) {
-      return res.status(400).json({ msg: 'No profile exists' });
-    }
-    return req.app.locals.gfs.openDownloadStream(_id).pipe(res);
-  });
+    });
 };
 
 exports.post_send_friend_request = (req, res, next) => {
