@@ -132,7 +132,7 @@ exports.post_update_character = [
         if (err) return next(err);
         if (!char) return res.json({ msg: 'Character doesn\'t exist' });
         if (char.owner != req.body.owner) return res.json({ msg: 'User doesn\'t own this character' });
-        Object.key(req.body).forEach((key) => {
+        Object.keys(req.body).forEach((key) => {
           if (req.body[key] != undefined && req.body[key] != []) {
             char[key] = req.body[key];
           }

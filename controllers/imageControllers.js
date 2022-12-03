@@ -1,6 +1,7 @@
 const { default: mongoose } = require('mongoose');
 const upload = require('../config.js/upload');
 
+// Returns a download stream of the selcted image
 exports.get_image = (req, res, next) => {
   const _id = new mongoose.Types.ObjectId(req.params.id);
   req.app.locals.gfs.find({ _id }).toArray((err, image) => {
@@ -12,6 +13,7 @@ exports.get_image = (req, res, next) => {
   });
 };
 
+// Adds image to database and returns its id
 exports.post_image = [
   upload,
   (req, res, next) => {
@@ -23,6 +25,7 @@ exports.post_image = [
   },
 ];
 
+// Adds new image to database, removes the old one and returns the new image id
 exports.post_update_image = [
   upload,
   (req, res, next) => {
@@ -37,6 +40,7 @@ exports.post_update_image = [
   },
 ];
 
+// Deletes the image from database
 exports.delete_image = (req, res, next) => {
   const _id = new mongoose.Types.ObjectId(req.params.id);
   req.app.locals.gfs.delete(_id, (err) => {
