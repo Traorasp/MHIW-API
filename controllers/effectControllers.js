@@ -1,7 +1,7 @@
 const { body, validationResult } = require('express-validator');
 const Effect = require('../models/effect');
 
-// Returnsall effects in the database
+// Returns all effects in the database
 exports.get_effect_list = (req, res, next) => {
   Effect.find()
     .exec((err, effects) => {

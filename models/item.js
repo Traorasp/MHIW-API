@@ -20,7 +20,7 @@ const ItemSchema = new Schema({
     damage: { type: Number, min: 0 },
     weight: { type: Number, min: 0 },
   },
-  skills: [{ type: Schema.Types.ObjectId, ref: 'Enchantment' }],
+  enchantments: [{ type: Schema.Types.ObjectId, ref: 'Enchantment' }],
   description: { type: String },
   background: { type: String },
 });

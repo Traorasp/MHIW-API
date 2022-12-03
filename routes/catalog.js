@@ -9,6 +9,7 @@ const charCont = require('../controllers/characterControllers');
 const effectCont = require('../controllers/effectControllers');
 const materCont = require('../controllers/materialControllers');
 const itemCont = require('../controllers/itemControllers');
+const enchCont = require('../controllers/enchantmentController');
 
 /// IMAGE Routes ///
 
@@ -114,5 +115,19 @@ router.post('/item/update', itemCont.post_update_item);
 
 // DELETE an item
 router.delete('/item/:id', itemCont.delete_item);
+
+/// ENCHANTMENT ROUTES ///
+
+// GET details of an enchantment
+router.get('/enchantment/:id', enchCont.get_enchantment_details);
+
+// GET list of all enchantment
+router.get('/enchantments', enchCont.get_enchantment_list);
+
+// POST a new enchantment
+router.post('/enchantment', enchCont.post_enchantment);
+
+// DELETE an enchantment
+router.delete('/enchantment/:id', enchCont.delete_enchantment);
 
 module.exports = router;

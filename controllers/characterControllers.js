@@ -6,16 +6,17 @@ const Character = require('../models/character');
 exports.get_character = (req, res, next) => {
   Character.findById(req.params.id)
     .exec((err, char) => {
+      if (err) return res.json({ msg: 'There was an error getting charcater' });
       if (!char) return res.json({ msg: 'Character does not exist' });
-      Object.entries(char).forEach(([key, value]) => {
+      const promises = [];
+      Object.entries(char._doc).forEach(([key, value]) => {
         if (Array.isArray(value) && value.length > 0) {
-          char.populate(key);
-        }
-        if (value == 'race' && key != '') {
-          char.populate(key);
+          promises.push(char.populate(key));
+        } else if (value === 'race' && key !== '') {
+          promises.push(char.populate(key));
         }
       });
-      return res.json(char);
+      return Promise.all(promises).then(() => res.json({ char }));
     });
 };
 
@@ -80,8 +81,8 @@ exports.post_update_character = [
     .escape(),
   body('raceSkill', '')
     .optional({ checkFalsy: true })
-    .custom((raceSkills) => {
-      const totalLV = 0;
+    .custom((raceSkills, { req }) => {
+      let totalLV = 0;
       Object.values(raceSkills).forEach((level) => {
         totalLV += level;
       });

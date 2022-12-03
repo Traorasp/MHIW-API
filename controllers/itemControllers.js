@@ -1,21 +1,23 @@
 const { body, validationResult } = require('express-validator');
 const Item = require('../models/item');
+const Enchantment = require('../models/enchantment');
 
 // Returns detail of a specific item
+// Uses promises since populate requires a promise
 exports.get_item_details = (req, res, next) => {
   Item.findById(req.params.id)
     .exec((err, item) => {
-      if (err) return res.json({ msg: 'There was an error getting items' });
+      if (err) return res.json({ msg: 'There was an error getting item' });
       if (!item) return res.json({ msg: 'No such item exists' });
-      Object.entries(item).forEach(([key, value]) => {
+      const promises = [];
+      Object.entries(item._doc).forEach(([key, value]) => {
         if (Array.isArray(value) && value.length > 0) {
-          item.populate(key);
-        }
-        if (value == 'material' && key != '') {
-          item.populate(key);
+          promises.push(item.populate(key));
+        } else if (value === 'material' && key !== '') {
+          promises.push(item.populate(key));
         }
       });
-      return res.json({ item });
+      return Promise.all(promises).then(() => res.json({ item }));
     });
 };
 
@@ -70,6 +72,52 @@ exports.post_item = [
     .trim()
     .optional({ checkFalsy: true })
     .escape(),
+  body('enchantments', '')
+    .optional({ checkFalsy: true })
+    .custom((enchantments, { req }) => {
+      let count = 0;
+
+      enchantments.forEach((id) => {
+        Enchantment.findById(id)
+          .exec((err, enchant) => {
+            if (err) throw new Error('Error checking enchants');
+            count += enchant.amount;
+          });
+      });
+      let max = 0;
+      switch (req.body.rarity) {
+        case 'VC':
+          max = 1;
+          break;
+        case 'C':
+          max = 2;
+          break;
+        case 'UC':
+          max = 3;
+          break;
+        case 'R':
+          max = 4;
+          break;
+        case 'U':
+          max = 5;
+          break;
+        case 'E':
+          max = 6;
+          break;
+        case 'L':
+          max = 7;
+          break;
+        case 'M':
+          max = 8;
+          break;
+        default:
+          throw new Error('Rarity does not exist');
+      }
+      if (count <= max) {
+        return true;
+      }
+      throw new Error(`Maximum amount of enchantments for item is ${max} currently has ${count}`);
+    }),
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -134,6 +182,52 @@ exports.post_update_item = [
     .trim()
     .optional({ checkFalsy: true })
     .escape(),
+  body('enchantments', '')
+    .optional({ checkFalsy: true })
+    .custom((enchantments, { req }) => {
+      let count = 0;
+
+      enchantments.forEach((id) => {
+        Enchantment.findById(id)
+          .exec((err, enchant) => {
+            if (err) throw new Error('Error checking enchants');
+            count += enchant.amount;
+          });
+      });
+      let max = 0;
+      switch (req.body.rarity) {
+        case 'VC':
+          max = 1;
+          break;
+        case 'C':
+          max = 2;
+          break;
+        case 'UC':
+          max = 3;
+          break;
+        case 'R':
+          max = 4;
+          break;
+        case 'U':
+          max = 5;
+          break;
+        case 'E':
+          max = 6;
+          break;
+        case 'L':
+          max = 7;
+          break;
+        case 'M':
+          max = 8;
+          break;
+        default:
+          throw new Error('Rarity does not exist');
+      }
+      if (count <= max) {
+        return true;
+      }
+      throw new Error(`Maximum amount of enchantments for item is ${max} currently has ${count}`);
+    }),
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
