@@ -169,9 +169,9 @@ exports.delete_friend = (req, res, next) => {
         user.friends.splice(index, 1);
         // Remove this user from exfriend friends list
         User.findById(req.body.id)
-          .exec((err, user) => {
-            user.friends.splice(user.friends.indexOf(req.params.id), 1);
-            user.save((err) => {
+          .exec((err, otherUser) => {
+            otherUser.friends.splice(otherUser.friends.indexOf(req.params.id), 1);
+            otherUser.save((err) => {
               if (err) return next(err);
             });
           });

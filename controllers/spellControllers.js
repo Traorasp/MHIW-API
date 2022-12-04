@@ -1,5 +1,6 @@
 const { body, validationResult } = require('express-validator');
 const Spell = require('../models/spell');
+const Magic = require('../models/magic');
 
 // Returns details of a cerrtain spell
 exports.get_spell_details = (req, res, next) => {
@@ -63,11 +64,11 @@ exports.post_spell = [
     .escape(),
   body('cost', 'Spell must have a positive cost')
     .trim()
-    .isInt({ min: 0 })
+    .isInt({ min: 1 })
     .escape(),
   body('range', 'Spell must have a positive range')
     .trim()
-    .isInt({ min: 0 })
+    .isInt({ min: 1 })
     .escape(),
   body('charge', 'Spell with a charge cannot have a charge of less than one')
     .trim()
@@ -194,6 +195,8 @@ exports.post_update_spell = [
         if (!replica) {
           Spell.findById(req.body.id)
             .exec((err, spell) => {
+              if (err) return next(err);
+              if (!spell) return res.json({ msg: 'No such spell exists' });
               Object.keys(req.body).forEach((key) => {
                 if (req.body[key] != undefined && req.body[key] != []) {
                   spell[key] = req.body[key];
@@ -214,7 +217,18 @@ exports.post_update_spell = [
 ];
 
 // Deletes a certain spell
-// Complete when magic model is finished
 exports.delete_spell = (req, res, next) => {
-
+  Magic.findOne({ spells: req.params.id })
+    .exec((err, magic) => {
+      if (err) return next(err);
+      if (!magic) return res.json({ msg: 'No such magic exists' });
+      magic.spells.splice(magic.spells.indexOf(req.params.id), 1);
+      magic.save(() => {
+        if (err) return next(err);
+        Spell.findByIdAndDelete(req.params.id, (err) => {
+          if (err) return res.json({ msg: 'Error deleting magic' });
+          return res.json({ msg: 'Succesfully deletd magic' });
+        });
+      });
+    });
 };

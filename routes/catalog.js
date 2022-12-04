@@ -11,6 +11,7 @@ const materCont = require('../controllers/materialControllers');
 const itemCont = require('../controllers/itemControllers');
 const enchCont = require('../controllers/enchantmentController');
 const spellCont = require('../controllers/spellControllers');
+const magicCont = require('../controllers/magicControllers');
 
 /// IMAGE Routes ///
 
@@ -147,5 +148,22 @@ router.post('/spell/update', spellCont.post_update_spell);
 
 // DELETE a spell
 router.delete('/spell/:id', spellCont.delete_spell);
+
+/// MAGIC ROUTES ///
+
+// GET details of a magic
+router.get('/magic/:id', magicCont.get_magic_details);
+
+// GET list of all magics
+router.get('/magics', magicCont.get_magic_list);
+
+// POST a new magic
+router.post('/magic', magicCont.post_magic);
+
+// POST an update to an old magic
+router.post('/magic/update', magicCont.post_update_magic);
+
+// DELETE a magic
+router.delete('/magic/:id', magicCont.delete_magic);
 
 module.exports = router;
