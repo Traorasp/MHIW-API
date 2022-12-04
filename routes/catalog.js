@@ -13,6 +13,7 @@ const enchCont = require('../controllers/enchantmentController');
 const spellCont = require('../controllers/spellControllers');
 const magicCont = require('../controllers/magicControllers');
 const aoeCont = require('../controllers/aoeControllers');
+const talentCont = require('../controllers/talentControllers');
 
 /// IMAGE Routes ///
 
@@ -167,7 +168,7 @@ router.post('/magic/update', magicCont.post_update_magic);
 // DELETE a magic
 router.delete('/magic/:id', magicCont.delete_magic);
 
-/// AOE ROUTS ///
+/// AOE ROUTES ///
 
 // GET list of all aoe
 router.get('/aoe', aoeCont.get_aoe);
@@ -178,7 +179,24 @@ router.post('/aoe', aoeCont.post_aoe);
 // POST update to an aoe
 router.post('/aoe/update', aoeCont.post_update_aoe);
 
-//  Delete a specific aoe
+// Delete a specific aoe
 router.delete('/aoe/:id', aoeCont.delete_aoe);
+
+/// TALENT ROUTES ///
+
+// GET one talent
+router.get('/talent/:id', talentCont.get_talent);
+
+// GET list of all talents
+router.get('/talents', talentCont.get_talent_list);
+
+// POST a new talent
+router.post('/talent', talentCont.post_talent);
+
+// POST update to an talent
+router.post('/talent/update', talentCont.post_update_talent);
+
+// Delete a specific talent
+router.delete('/talent/:id', talentCont.delete_talent);
 
 module.exports = router;

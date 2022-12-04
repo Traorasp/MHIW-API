@@ -11,7 +11,7 @@ exports.get_aoe = (req, res, next) => {
     });
 };
 
-// Creates a new aoe in datatbase and returns it
+// Creates a new aoe in datatbase if it already doesn't exist and returns it
 exports.post_aoe = [
   body('name', 'Name cannot be empty')
     .trim()
@@ -52,7 +52,7 @@ exports.post_aoe = [
   },
 ];
 
-// Creates a new aoe in datatbase and returns it
+// Updates a aoe in datatbase if exact one doesn't already exist and returns it
 exports.post_update_aoe = [
   body('name', 'Name cannot be empty')
     .trim()
@@ -79,13 +79,13 @@ exports.post_update_aoe = [
       .exec((err, replica) => {
         if (err) return next(err);
         if (!replica) {
-          const aoe = new AOE({
+          const data = {
             _id: req.body.id,
             name: req.body.name,
             fixed: req.body.fixed,
             range: req.body.range,
-          });
-          aoe.save((err) => {
+          };
+          AOE.findByIdAndUpdate(req.body.id, data, (err, aoe) => {
             if (err) return next(err);
             return res.json({ aoe, msg: 'Succesfully updated AOE' });
           });
@@ -94,7 +94,7 @@ exports.post_update_aoe = [
   },
 ];
 
-// Creates a new aoe in datatbase and returns it
+// Deletes a spell from its magic and then itself
 exports.delete_aoe = (req, res, next) => {
   Spell.findOne({ aoe: req.params.id })
     .exec((err, spell) => {
