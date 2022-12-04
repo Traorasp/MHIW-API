@@ -12,6 +12,7 @@ const itemCont = require('../controllers/itemControllers');
 const enchCont = require('../controllers/enchantmentController');
 const spellCont = require('../controllers/spellControllers');
 const magicCont = require('../controllers/magicControllers');
+const aoeCont = require('../controllers/aoeControllers');
 
 /// IMAGE Routes ///
 
@@ -165,5 +166,19 @@ router.post('/magic/update', magicCont.post_update_magic);
 
 // DELETE a magic
 router.delete('/magic/:id', magicCont.delete_magic);
+
+/// AOE ROUTS ///
+
+// GET list of all aoe
+router.get('/aoe', aoeCont.get_aoe);
+
+// POST a new aoe
+router.post('/aoe', aoeCont.post_aoe);
+
+// POST update to an aoe
+router.post('/aoe/update', aoeCont.post_update_aoe);
+
+//  Delete a specific aoe
+router.delete('/aoe/:id', aoeCont.delete_aoe);
 
 module.exports = router;
