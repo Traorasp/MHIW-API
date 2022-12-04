@@ -10,6 +10,7 @@ const effectCont = require('../controllers/effectControllers');
 const materCont = require('../controllers/materialControllers');
 const itemCont = require('../controllers/itemControllers');
 const enchCont = require('../controllers/enchantmentController');
+const spellCont = require('../controllers/spellControllers');
 
 /// IMAGE Routes ///
 
@@ -129,5 +130,22 @@ router.post('/enchantment', enchCont.post_enchantment);
 
 // DELETE an enchantment
 router.delete('/enchantment/:id', enchCont.delete_enchantment);
+
+/// SPELL ROUTES ///
+
+// GET details of a spell
+router.get('/spell/:id', spellCont.get_spell_details);
+
+// GET list of all spells
+router.get('/spells', spellCont.get_spell_list);
+
+// POST a new spell
+router.post('/spell', spellCont.post_spell);
+
+// POST an update to an old spell
+router.post('/spell/update', spellCont.post_update_spell);
+
+// DELETE a spell
+router.delete('/spell/:id', spellCont.delete_spell);
 
 module.exports = router;

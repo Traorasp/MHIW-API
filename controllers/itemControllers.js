@@ -21,7 +21,7 @@ exports.get_item_details = (req, res, next) => {
     });
 };
 
-// Returns list of ll items
+// Returns list of all items
 exports.get_item_list = (req, res, next) => {
   Item.find()
     .exec((err, items) => {

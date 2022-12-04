@@ -56,13 +56,11 @@ exports.post_material = [
           });
           newMaterial.save((err) => {
             if (err) {
-              req.app.locals.gfs.delete(req.file.id, () => {});
               return next(err);
             }
             return res.json({ newMaterial, msg: 'Material succesfully created' });
           });
         } else {
-          req.app.locals.gfs.delete(req.file.id, () => {});
           return res.json({ material, msg: 'Material already exists' });
         }
       });
@@ -102,13 +100,11 @@ exports.post_update_material = [
           });
           Material.findByIdAndUpdate(req.body.id, newMaterial, (err) => {
             if (err) {
-              req.app.locals.gfs.delete(req.file.id, () => {});
               return next(err);
             }
             return res.json({ newMaterial, msg: 'Succesfully updated material' });
           });
         } else {
-          req.app.locals.gfs.delete(req.file.id, () => {});
           return res.json({ material, msg: 'Material already exists' });
         }
       });
