@@ -142,7 +142,7 @@ exports.post_update_race = [
             if (err) {
               return next(err);
             }
-            return res.json({ race, msg: 'Race succesfully created' });
+            return res.json({ race, msg: 'Race succesfully updated' });
           });
         } else {
           return res.json({ replica, msg: 'Race already exists' });

@@ -16,7 +16,7 @@ const aoeCont = require('../controllers/aoeControllers');
 const talentCont = require('../controllers/talentControllers');
 const skillCont = require('../controllers/skillController');
 const raceCont = require('../controllers/raceController');
-
+const titleCont = require('../controllers/titleController');
 /// IMAGE Routes ///
 
 // GET image with its id
@@ -234,5 +234,22 @@ router.post('/race/update', raceCont.post_update_race);
 
 // Delete a specific race
 router.delete('/race/:id', raceCont.delete_race);
+
+/// TITLE ROTES ///
+
+// GET details of a title
+router.get('/title/:id', titleCont.get_title_details);
+
+// GET list of all title
+router.get('/titles', titleCont.get_title_list);
+
+// POST a new title
+router.post('/title', titleCont.post_title);
+
+// POST update to a title
+router.post('/title/update', titleCont.post_update_title);
+
+// Delete a specific title
+router.delete('/title/:id', titleCont.delete_title);
 
 module.exports = router;
