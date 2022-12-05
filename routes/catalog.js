@@ -14,6 +14,7 @@ const spellCont = require('../controllers/spellControllers');
 const magicCont = require('../controllers/magicControllers');
 const aoeCont = require('../controllers/aoeControllers');
 const talentCont = require('../controllers/talentControllers');
+const skillCont = require('../controllers/skillController');
 
 /// IMAGE Routes ///
 
@@ -193,10 +194,27 @@ router.get('/talents', talentCont.get_talent_list);
 // POST a new talent
 router.post('/talent', talentCont.post_talent);
 
-// POST update to an talent
+// POST update to a talent
 router.post('/talent/update', talentCont.post_update_talent);
 
 // Delete a specific talent
 router.delete('/talent/:id', talentCont.delete_talent);
+
+/// SKILL ROTES ///
+
+// GET details of a skill
+router.get('/skill/:id', skillCont.get_skill_details);
+
+// GET list of all skills
+router.get('/skills', skillCont.get_skill_list);
+
+// POST a new skill
+router.post('/skill', skillCont.post_skill);
+
+// POST update to a skill
+router.post('/skill/update', skillCont.post_update_skill);
+
+// Delete a specific skill
+router.delete('/skill/:id', skillCont.delete_skill);
 
 module.exports = router;

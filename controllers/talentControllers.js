@@ -182,7 +182,7 @@ exports.post_update_talent = [
           };
           Talent.findByIdAndUpdate(req.body.id, data, (err, talent) => {
             if (err) return next(err);
-            return res.json({ talent, msg: 'Succesfully update talent' });
+            return res.json({ talent, msg: 'Succesfully updated talent' });
           });
         } else return res.json({ replica, msg: 'Talent already exists' });
       });
@@ -200,7 +200,7 @@ exports.delete_talent = (req, res, next) => {
           return res.json({ msg: 'Succesfully removed talent' });
         });
       } else {
-        return res.json({ char, msg: 'There are still characetes with talent' });
+        return res.json({ char, msg: 'There are still characetes with the talent' });
       }
     });
 };

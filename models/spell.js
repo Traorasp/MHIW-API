@@ -18,7 +18,7 @@ const SpellSchema = new Schema({
   },
   cost: { type: Number, required: true, min: 1 },
   range: { type: Number, required: true, min: 1 },
-  aoe: [{ type: Schema.Types.ObjectId, ref: 'Aoe' }],
+  aoe: [{ type: Schema.Types.ObjectId, ref: 'AOE' }],
   effects: [{ type: Schema.Types.ObjectId, ref: 'Effect' }],
   description: { type: String },
   charge: { type: Number, min: 1 },
