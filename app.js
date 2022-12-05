@@ -13,6 +13,8 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const methodOverride = require('method-override');
 const bodyParser = require('body-parser');
+const compression = require('compression');
+const helmet = require('helmet');
 const User = require('./models/user');
 const catalogRouter = require('./routes/catalog');
 const verifyToken = require('./config.js/verifyToken');
@@ -77,6 +79,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(helmet());
+app.use(compression()); // Compresses routes
 
 app.use('/', verifyToken, catalogRouter);
 

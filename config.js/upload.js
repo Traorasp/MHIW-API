@@ -22,14 +22,6 @@ const storage = new GridFsStorage({
   }),
 });
 
-const store = multer({
-  storage,
-  limits: { fileSize: 20000000 },
-  fileFilter(req, file, cb) {
-    checkFileType(file, cb);
-  },
-});
-
 function checkFileType(file, cb) {
   const filetypes = /jpeg|jpg|png/;
   const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
@@ -38,6 +30,14 @@ function checkFileType(file, cb) {
   if (mimetype && extname) return cb(null, true);
   cb('filetype');
 }
+
+const store = multer({
+  storage,
+  limits: { fileSize: 20000000 },
+  fileFilter(req, file, cb) {
+    checkFileType(file, cb);
+  },
+});
 
 module.exports = (req, res, next) => {
   const upload = store.single('image');
