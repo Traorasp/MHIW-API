@@ -15,6 +15,7 @@ const magicCont = require('../controllers/magicControllers');
 const aoeCont = require('../controllers/aoeControllers');
 const talentCont = require('../controllers/talentControllers');
 const skillCont = require('../controllers/skillController');
+const raceCont = require('../controllers/raceController');
 
 /// IMAGE Routes ///
 
@@ -216,5 +217,22 @@ router.post('/skill/update', skillCont.post_update_skill);
 
 // Delete a specific skill
 router.delete('/skill/:id', skillCont.delete_skill);
+
+/// RACE ROTES ///
+
+// GET details of a race
+router.get('/race/:id', raceCont.get_race_details);
+
+// GET list of all races
+router.get('/races', raceCont.get_race_list);
+
+// POST a new race
+router.post('/race', raceCont.post_race);
+
+// POST update to a race
+router.post('/race/update', raceCont.post_update_race);
+
+// Delete a specific race
+router.delete('/race/:id', raceCont.delete_race);
 
 module.exports = router;
