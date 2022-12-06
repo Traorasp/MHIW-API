@@ -6,8 +6,8 @@ const Magic = require('../models/magic');
 exports.get_spell_details = (req, res, next) => {
   Spell.findById(req.params.id)
     .exec((err, spell) => {
-      if (err) return res.json({ msg: 'There was an error getting spell' });
-      if (!spell) return res.json({ msg: 'No such spell exists' });
+      if (err) return res.status(404).json({ err, msg: 'Error retrieving spell' });
+      if (!spell) return res.status(404).json({ err, msg: 'Spell does not exist' });
       const promises = [];
       Object.entries(spell._doc).forEach(([key, value]) => {
         if (Array.isArray(value) && value.length > 0) {
@@ -24,7 +24,7 @@ exports.get_spell_details = (req, res, next) => {
 exports.get_spell_list = (req, res, next) => {
   Spell.find()
     .exec((err, spells) => {
-      if (err) return res.json({ msg: 'There was an error getting spells' });
+      if (err) return res.status(404).json({ err, msg: 'Error retrieving spells' });
       return res.json({ spells });
     });
 };
@@ -99,7 +99,7 @@ exports.post_spell = [
       charge: req.body.charge,
     })
       .exec((err, replica) => {
-        if (err) return next(err);
+        if (err) return res.status(404).json({ err, msg: 'Error retrieving replica' });
         if (!replica) {
           const spell = new Spell({});
           Object.keys(req.body).forEach((key) => {
@@ -108,9 +108,7 @@ exports.post_spell = [
             }
           });
           spell.save((err) => {
-            if (err) {
-              return next(err);
-            }
+            if (err) return res.status(404).json({ err, msg: 'Failed to save spell' });
             return res.json({ spell, msg: 'Spell succesfully created' });
           });
         } else {
@@ -191,21 +189,19 @@ exports.post_update_spell = [
       charge: req.body.charge,
     })
       .exec((err, replica) => {
-        if (err) return next(err);
+        if (err) return res.status(404).json({ err, msg: 'Error retrieving replica' });
         if (!replica) {
           Spell.findById(req.body.id)
             .exec((err, spell) => {
-              if (err) return next(err);
-              if (!spell) return res.json({ msg: 'No such spell exists' });
+              if (err) return res.status(404).json({ err, msg: 'Error retrieving spell' });
+              if (!spell) return res.status(404).json({ msg: 'Spell does not exist' });
               Object.keys(req.body).forEach((key) => {
                 if (req.body[key] != undefined && req.body[key] != []) {
                   spell[key] = req.body[key];
                 }
               });
               spell.save((err) => {
-                if (err) {
-                  return next(err);
-                }
+                if (err) return res.status(404).json({ err, msg: 'Failed to save spell' });
                 return res.json({ spell, msg: 'Spell succesfully updated' });
               });
             });
@@ -220,13 +216,13 @@ exports.post_update_spell = [
 exports.delete_spell = (req, res, next) => {
   Magic.findOne({ spells: req.params.id })
     .exec((err, magic) => {
-      if (err) return next(err);
-      if (!magic) return res.json({ msg: 'No such magic exists' });
+      if (err) return res.status(404).json({ err, msg: 'Failed to retrieve magic' });
+      if (!magic) return res.status(404).json({ err, msg: 'Magic does not exist' });
       magic.spells.splice(magic.spells.indexOf(req.params.id), 1);
       magic.save(() => {
-        if (err) return next(err);
+        if (err) return res.status(404).json({ err, msg: 'Failed to save magic' });
         Spell.findByIdAndDelete(req.params.id, (err) => {
-          if (err) return res.json({ msg: 'Error deleting magic' });
+          if (err) return res.status(404).json({ msg: 'Failed to remove magic' });
           return res.json({ msg: 'Succesfully deletd magic' });
         });
       });

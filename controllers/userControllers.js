@@ -49,13 +49,13 @@ exports.register_post = [
     }
 
     bcrypt.hash(req.body.password, 12, (err, hashedPassword) => {
-      if (err) return next(err);
+      if (err) return res.status(500).json({ err, msg: 'Error hashing password' });
 
       new User({
         username: req.body.username,
         password: hashedPassword,
       }).save(() => {
-        if (err) return next(err);
+        if (err) return res.status(404)({ err, msg: 'Failed to save user' });
         return res.json({ msg: 'Sucesfully registered' });
       });
     });
@@ -66,13 +66,13 @@ exports.register_post = [
 exports.post_new_profile = (req, res, next) => {
   User.findById(req.params.id)
     .exec((err, user) => {
-      if (err) return next(err);
+      if (err) return res.status(404).json({ err, msg: 'Error retreving user' });
       if (!user) {
-        return res.json({ msg: 'User doesn\'t exist' });
+        return res.status(404).json({ err, msg: 'User does not exist' });
       }
       user.profilePic = req.params.id;
       user.save(() => {
-        if (err) return next(err);
+        if (err) return res.status(404).json({ err, msg: 'Failed to save profile' });
         return res.json({ imageId: req.params.id, msg: 'Sucesfully changed profile' });
       });
     });
@@ -81,17 +81,18 @@ exports.post_new_profile = (req, res, next) => {
 exports.post_send_friend_request = (req, res, next) => {
   User.findById(req.params.id)
     .exec((err, user) => {
-      const idOfRequester = req.body.id;
-      if (user == null) {
+      if (err) res.status(404).json({ err, msg: 'Error retrieving user' });
+      if (!user) {
         return res.json({ msg: "User doesn't exist" });
       }
-      if (err) next(err);
+      const idOfRequester = req.body.id;
+
       if (user.friendRequests.find((request) => request == idOfRequester)) {
         return res.json({ msg: 'You have already sent a friend request to this user' });
       }
       user.friendRequests = [...user.friendRequests, idOfRequester];
       user.save((err) => {
-        if (err) return next(err);
+        if (err) return res.status(404).json({ err, msg: 'Failed to save user' });
         return res.json({ msg: 'Sucesfully sent request' });
       });
     });
@@ -102,10 +103,10 @@ exports.get_friend_requests = (req, res, next) => {
   User.findById(req.params.id)
     .populate('friendRequests')
     .exec((err, user) => {
-      if (user == null) {
-        return res.json({ msg: "User doesn't exist" });
+      if (err) res.status(404).json({ err, msg: 'Error retrieving user' });
+      if (!user) {
+        return res.status(404).json({ err, msg: 'User does not exist' });
       }
-      if (err) next(err);
       return res.json(user.friendRequests);
     });
 };
@@ -115,11 +116,9 @@ exports.get_friend_requests = (req, res, next) => {
 exports.post_accept_friend_request = (req, res, next) => {
   User.findById(req.params.id)
     .exec((err, user) => {
+      if (err) res.status(404).json({ err, msg: 'Error retrieving user' });
+      if (!user) return res.json({ err, msg: 'User does not exist' });
       const idOfRequester = req.body.id;
-      if (user == null) {
-        return res.json({ msg: "User doesn't exist" });
-      }
-      if (err) next(err);
       const index = user.friendRequests.indexOf(idOfRequester);
       if (index >= 0) {
         user.friends = [...user.friends, idOfRequester];
@@ -127,14 +126,15 @@ exports.post_accept_friend_request = (req, res, next) => {
         // Adds requestee to requesters friend list
         User.findById(req.body.id)
           .exec((err, user) => {
+            if (err) res.status(404).json({ err, msg: 'Error retrieving user' });
             user.friendRequests.splice(user.friendRequests.indexOf(req.params.id), 1);
             user.friends = [...user.friends, req.params.id];
             user.save((err) => {
-              if (err) return next(err);
+              if (err) return res.status(404).json({ err, msg: 'Failed to save user' });
             });
           });
         user.save(() => {
-          if (err) return next(err);
+          if (err) return res.status(404).json({ err, msg: 'Failed to save user' });
           return res.json({ msg: 'Sucesfully accepter request' });
         });
       } else {
@@ -148,10 +148,8 @@ exports.get_friend_list = (req, res, next) => {
   User.findById(req.params.id)
     .populate('friends')
     .exec((err, user) => {
-      if (user == null) {
-        return res.json({ msg: "User doesn't exist" });
-      }
-      if (err) next(err);
+      if (err) return res.status(404).json({ err, msg: 'Error retrieving user' });
+      if (!user) return res.json({ msg: 'User does not exist' });
       return res.json(user.friends);
     });
 };
@@ -160,10 +158,8 @@ exports.get_friend_list = (req, res, next) => {
 exports.delete_friend = (req, res, next) => {
   User.findById(req.params.id)
     .exec((err, user) => {
-      if (user == null) {
-        return res.json({ msg: "User doesn't exist" });
-      }
-      if (err) next(err);
+      if (err) return res.status(404).json({ err, msg: 'Error retrieving user' });
+      if (!user) return res.json({ msg: 'User does not exist' });
       const index = user.friends.indexOf(req.body.id);
       if (index > -1) {
         user.friends.splice(index, 1);
@@ -172,11 +168,11 @@ exports.delete_friend = (req, res, next) => {
           .exec((err, otherUser) => {
             otherUser.friends.splice(otherUser.friends.indexOf(req.params.id), 1);
             otherUser.save((err) => {
-              if (err) return next(err);
+              if (err) return res.status(404).json({ err, msg: 'Failed to save user' });
             });
           });
         user.save(() => {
-          if (err) return next(err);
+          if (err) return res.status(404).json({ err, msg: 'Failed to save user' });
           return res.json({ msg: 'Sucesfully removed friend' });
         });
       } else {
@@ -189,16 +185,13 @@ exports.delete_friend = (req, res, next) => {
 exports.delete_friend_request = (req, res, next) => {
   User.findById(req.params.id)
     .exec((err, user) => {
-      if (user == null) {
-        return res.json({ msg: "User doesn't exist" });
-      }
-      if (err) next(err);
-
+      if (err) return res.status(404).json({ err, msg: 'Error retrieving user' });
+      if (!user) return res.status(404).json({ msg: "User doesn't exist" });
       const index = user.friendRequests.indexOf(req.body.id);
       if (index > -1) {
         user.friendRequests.splice(index, 1);
         user.save((err) => {
-          if (err) return next(err);
+          if (err) return res.status(404).json({ err, msg: 'Failed to remove freind request' });
           return res.json({ msg: 'Sucesfully declined friend request' });
         });
       } else {

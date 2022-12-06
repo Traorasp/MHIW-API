@@ -1,13 +1,14 @@
 const { body, validationResult } = require('express-validator');
 const Material = require('../models/material');
+const Item = require('../models/item');
 
 // Returns detailed info of a material
 exports.get_material_details = (req, res, next) => {
   Material.findById(req.params.id)
     .populate('effects')
     .exec((err, material) => {
-      if (err) return next(err);
-      if (!material) return res.json({ msg: 'Material doesn\'t exist' });
+      if (err) return res.status(404).json({ err, msg: 'Error retrieving material' });
+      if (!material) return res.status(404).json({ err, msg: 'Material does not exist' });
       return res.json({ material });
     });
 };
@@ -17,8 +18,8 @@ exports.get_material_list = (req, res, next) => {
   Material.find()
     .populate('effects')
     .exec((err, materials) => {
-      if (err) return next(err);
-      if (!materials) return res.json({ msg: 'Materials don\'t exist' });
+      if (err) return res.status(404).json({ err, msg: 'Error retrieving materials' });
+      if (!materials) return res.status(404).json({ err, msg: 'Materials does not exist' });
       return res.json({ materials });
     });
 };
@@ -29,7 +30,7 @@ exports.post_material = [
     .trim()
     .isLength({ min: 1 })
     .escape(),
-  body('description', 'Materia; must have a description')
+  body('description', 'Material must have a description')
     .trim()
     .isLength({ min: 1 })
     .escape(),
@@ -45,23 +46,23 @@ exports.post_material = [
       name: req.body.name,
       description: req.body.description,
     })
-      .exec((err, material) => {
-        if (err) return next(err);
-        if (!material) {
-          const newMaterial = new Material({
+      .exec((err, replica) => {
+        if (err) return res.status(404).json({ err, msg: 'Error retrieving material' });
+        if (!replica) {
+          const material = new Material({
             name: req.body.name,
             description: req.body.description,
             image: req.file.id,
             effects: req.body.effects,
           });
-          newMaterial.save((err) => {
+          material.save((err) => {
             if (err) {
-              return next(err);
+              return res.status(404).json({ err, msg: 'Failed to save material' });
             }
-            return res.json({ newMaterial, msg: 'Material succesfully created' });
+            return res.json({ material, msg: 'Material succesfully created' });
           });
         } else {
-          return res.json({ material, msg: 'Material already exists' });
+          return res.json({ replica, msg: 'Material already exists' });
         }
       });
   },
@@ -88,30 +89,39 @@ exports.post_update_material = [
       name: req.body.name,
       description: req.body.description,
     })
-      .exec((err, material) => {
-        if (err) return next(err);
-        if (!material) {
-          const newMaterial = new Material({
-            _id: req.body.id,
+      .exec((err, replica) => {
+        if (err) return res.status(404).json({ err, msg: 'Error retrieving replica' });
+        if (!replica) {
+          const data = {
             name: req.body.name,
             description: req.body.description,
             image: req.body.imageId,
             effects: req.body.effects,
-          });
-          Material.findByIdAndUpdate(req.body.id, newMaterial, (err) => {
+          };
+          Material.findByIdAndUpdate(req.body.id, data, (err, material) => {
             if (err) {
-              return next(err);
+              return res.status(404).json({ err, msg: 'Failed to save material' });
             }
-            return res.json({ newMaterial, msg: 'Succesfully updated material' });
+            return res.json({ material, msg: 'Succesfully updated material' });
           });
         } else {
-          return res.json({ material, msg: 'Material already exists' });
+          return res.json({ replica, msg: 'Material already exists' });
         }
       });
   },
 ];
 
-// WIP COPLETE WHE ITEMS CONTROLLERS ARE COMPLETE
+// deletes material if there are no references to it
 exports.delete_material = (req, res, next) => {
-
+  Item.findOne({material : req.param.id}) {
+    if(err) return res.status(404).json({err, msg: 'Error retrieving item'})
+    if(!item) {
+      Material.findByIdAndDelete(req.params.id, (err) => {
+        if(err) return res.status(404).json({err, msg: 'Failed to remove material'})
+        return res.json({msg : 'Succesfully removed material'})
+      })
+    } else {
+      return res.json({item, msg: 'Items still reference material'})
+    }
+  }
 };

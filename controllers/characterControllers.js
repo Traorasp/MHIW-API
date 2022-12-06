@@ -6,8 +6,8 @@ const Character = require('../models/character');
 exports.get_character = (req, res, next) => {
   Character.findById(req.params.id)
     .exec((err, char) => {
-      if (err) return res.json({ msg: 'There was an error getting charcater' });
-      if (!char) return res.json({ msg: 'Character does not exist' });
+      if (err) return res.status(404).json({ err, msg: 'Error retrieving charcater' });
+      if (!char) return res.status(404).json({ err, msg: 'Character does not exist' });
       const promises = [];
       Object.entries(char._doc).forEach(([key, value]) => {
         if (Array.isArray(value) && value.length > 0) {
@@ -24,7 +24,7 @@ exports.get_character = (req, res, next) => {
 exports.get_character_list = (req, res, next) => {
   Character.find({ owner: req.body.id })
     .exec((err, characters) => {
-      if (!characters) return res.json({ msg: 'Chracters don\'t exist' });
+      if (err) return res.status(404).json({ err, msg: 'Error retrieving characters' });
       return res.json(characters);
     });
 };
@@ -59,7 +59,7 @@ exports.post_create_character = [
       level: req.body.level,
     });
     char.save((err) => {
-      if (err) { return next(err); }
+      if (err) return res.status(404).json({ err, msg: 'Failed to save character' });
       return res.json(char);
     });
   }];
@@ -130,9 +130,9 @@ exports.post_update_character = [
     }
     Character.findById(req.body.id)
       .exec((err, char) => {
-        if (err) return next(err);
-        if (!char) return res.json({ msg: 'Character doesn\'t exist' });
-        if (char.owner != req.body.owner) return res.json({ msg: 'User doesn\'t own this character' });
+        if (err) return res.status(404).json({ err, msg: 'Error retrieving character' });
+        if (!char) return res.status(404).json({ err, msg: 'Character does not exist' });
+        if (char.owner != req.body.owner) return res.status(403).json({ err, msg: 'User does not own this character' });
         Object.keys(req.body).forEach((key) => {
           if (req.body[key] != undefined && req.body[key] != []) {
             char[key] = req.body[key];
@@ -140,7 +140,7 @@ exports.post_update_character = [
         });
 
         char.save((err) => {
-          if (err) return res.json({ err, msg: 'Failed to save changes' });
+          if (err) return res.status(404).json({ err, msg: 'Failed to save changes' });
           return res.json({ msg: 'Sucesfully updated character', char });
         });
       });
@@ -151,13 +151,13 @@ exports.post_update_character = [
 exports.delete_character = (req, res, next) => {
   Character.findById(req.params.id)
     .exec((err, char) => {
-      if (err) return next(err);
-      if (!char) return res.json({ msg: 'Character doesn\'t exist' });
+      if (err) return res.status(404).json({ err, msg: 'Error retrieving characters' });
+      if (!char) return res.status(404).json({ err, msg: 'Character does not exist' });
       if (char.owner != req.body.owner) {
-        return res.json({ msg: 'User doesn\'t own this character' });
+        return res.status(403).json({ err, msg: 'User does not own this character' });
       }
       char.remove((err) => {
-        if (err) return res.json({ msg: 'Failed to remove this character' });
+        if (err) return res.status(404).json({ err, msg: 'Failed to remove this character' });
         return res.json({ msg: 'Sucesfully removed character' });
       });
     });

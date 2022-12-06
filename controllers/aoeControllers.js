@@ -6,7 +6,7 @@ const Spell = require('../models/spell');
 exports.get_aoe = (req, res, next) => {
   AOE.find()
     .exec((err, aoe) => {
-      if (err) return res.json({ msg: 'Error getting aoe list' });
+      if (err) return res.status(404).json({ err, msg: 'Error getting aoe list' });
       return res.json(aoe);
     });
 };
@@ -36,7 +36,7 @@ exports.post_aoe = [
       range: req.body.range,
     })
       .exec((err, replica) => {
-        if (err) return next(err);
+        if (err) return res.status(404).json({ err, msg: 'Error retrieving aoe replica' });
         if (!replica) {
           const aoe = new AOE({
             name: req.body.name,
@@ -44,7 +44,7 @@ exports.post_aoe = [
             range: req.body.range,
           });
           aoe.save((err) => {
-            if (err) return next(err);
+            if (err) return res.status(404).json({ err, msg: 'Failed to save aoe' });
             return res.json({ aoe, msg: 'Succesfully created new AOE' });
           });
         } else return res.json({ replica, msg: 'AOE already exists' });
@@ -77,7 +77,7 @@ exports.post_update_aoe = [
       range: req.body.range,
     })
       .exec((err, replica) => {
-        if (err) return next(err);
+        if (err) return res.status(404).json({ err, msg: 'Error retrieving aoe replica' });
         if (!replica) {
           const data = {
             _id: req.body.id,
@@ -86,7 +86,7 @@ exports.post_update_aoe = [
             range: req.body.range,
           };
           AOE.findByIdAndUpdate(req.body.id, data, (err, aoe) => {
-            if (err) return next(err);
+            if (err) return res.status(404).json({ err, msg: 'Failed to save aoe' });
             return res.json({ aoe, msg: 'Succesfully updated AOE' });
           });
         } else return res.json({ replica, msg: 'AOE already exists' });
@@ -98,10 +98,10 @@ exports.post_update_aoe = [
 exports.delete_aoe = (req, res, next) => {
   Spell.findOne({ aoe: req.params.id })
     .exec((err, spell) => {
-      if (err) return res.json({ msg: 'There was an error getting spells' });
+      if (err) return res.status(404).json({ err, msg: 'Error retrieving spells' });
       if (!spell) {
         AOE.findByIdAndDelete(req.params.id, (err) => {
-          if (err) return res.json({ msg: 'Error deleting aoe' });
+          if (err) return res.status(404).json({ err, msg: 'Error deleting aoe' });
           return res.json({ msg: 'Succesfully removed aoe' });
         });
       } else {

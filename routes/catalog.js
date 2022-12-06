@@ -86,7 +86,7 @@ router.get('/effects', effectCont.get_effect_list);
 router.post('/effect', effectCont.post_effect);
 
 // DELETE an existing effect
-router.delete('/effect', effectCont.delete_effect);
+router.delete('/effect/:id', effectCont.delete_effect);
 
 /// MATERIAL ROUTES ///
 

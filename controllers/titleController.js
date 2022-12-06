@@ -6,8 +6,8 @@ const Character = require('../models/character');
 exports.get_title_details = (req, res, next) => {
   Title.findById(req.params.id)
     .exec((err, title) => {
-      if (err) return res.json({ msg: 'There was an error getting title' });
-      if (!title) return res.json({ msg: 'No such title exists' });
+      if (err) return res.status(404).json({ err, msg: 'Error retrieving title' });
+      if (!title) return res.status(404).json({ err, msg: 'Title does not exist' });
       const promises = [];
       Object.entries(title._doc).forEach(([key, value]) => {
         if (Array.isArray(value) && value.length > 0) {
@@ -22,7 +22,7 @@ exports.get_title_details = (req, res, next) => {
 exports.get_title_list = (req, res, next) => {
   Title.find()
     .exec((err, titles) => {
-      if (err) return res.json({ msg: 'There was an error getting title' });
+      if (err) return res.status(404).json({ err, msg: 'Error retrieving titles' });
       return res.json({ titles });
     });
 };
@@ -55,7 +55,7 @@ exports.post_title = [
       description: req.body.description,
     })
       .exec((err, replica) => {
-        if (err) return next(err);
+        if (err) return res.status(404).json({ err, msg: 'Error retrieving replica' });
         if (!replica) {
           const title = new Title({});
           Object.keys(req.body).forEach((key) => {
@@ -64,9 +64,7 @@ exports.post_title = [
             }
           });
           title.save((err) => {
-            if (err) {
-              return next(err);
-            }
+            if (err) return res.status(404).json({ err, msg: 'Failed to save title' });
             return res.json({ title, msg: 'Title succesfully created' });
           });
         } else {
@@ -104,7 +102,7 @@ exports.post_update_title = [
       description: req.body.name,
     })
       .exec((err, replica) => {
-        if (err) return next(err);
+        if (err) return res.status(404).json({ err, msg: 'Error retrieving title' });
         if (!replica || replica.id != req.body.id) {
           const data = {};
           Object.keys(req.body).forEach((key) => {
@@ -113,9 +111,7 @@ exports.post_update_title = [
             }
           });
           Title.findByIdAndUpdate(req.body.id, data, (err, title) => {
-            if (err) {
-              return next(err);
-            }
+            if (err) return res.status(404).json({ err, msg: 'Failed to save title' });
             return res.json({ title, msg: 'Title succesfully updated' });
           });
         } else {
@@ -128,10 +124,10 @@ exports.post_update_title = [
 exports.delete_title = (req, res, next) => {
   Character.findOne({ titles: req.params.id })
     .exec((err, char) => {
-      if (err) return next(err);
+      if (err) return res.status(404).json({ err, msg: 'Error retrieving title' });
       if (!char) {
         Title.findByIdAndDelete(req.params.id, (err) => {
-          if (err) return res.json({ msg: 'Error deleting title' });
+          if (err) return res.status(404).json({ err, msg: 'Failed to remove title' });
           return res.json({ msg: 'Succesfully removed title' });
         });
       } else {

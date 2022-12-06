@@ -1,12 +1,19 @@
 const { body, validationResult } = require('express-validator');
+const async = require('async');
 const Effect = require('../models/effect');
+const Character = require('../models/character');
+const Item = require('../models/item');
+const Material = require('../models/material');
+const Race = require('../models/race');
+const Skill = require('../models/skill');
+const Spell = require('../models/spell');
+const Title = require('../models/title');
 
 // Returns all effects in the database
 exports.get_effect_list = (req, res, next) => {
   Effect.find()
     .exec((err, effects) => {
-      if (err) return next(err);
-      if (!effects) return res.json({ msg: 'There are no effects' });
+      if (err) return res.status(404).json({ err, msg: 'Failed to retrieve effect' });
       return res.json(effects);
     });
 };
@@ -63,10 +70,10 @@ exports.post_effect = [
       effect: req.body.effect,
       duration: req.body.duration,
     })
-      .exec((err, effect) => {
-        if (err) return next(err);
-        if (!effect) {
-          const newEffect = new Effect({
+      .exec((err, replica) => {
+        if (err) return res.status(404).json({ err, msg: 'Error retrieving replica' });
+        if (!replica) {
+          const effect = new Effect({
             name: req.body.name,
             damageType: req.body.damageType,
             damage: req.body.damage,
@@ -76,17 +83,55 @@ exports.post_effect = [
             effect: req.body.effect,
             duration: req.body.duration,
           });
-          newEffect.save((err) => {
-            if (err) return next(err);
-            return res.json({ newEffect, msg: 'Succesfully created new effect' });
+          effect.save((err) => {
+            if (err) return res.status(404).json({ err, msg: 'Failed to save effect' });
+            return res.json({ effect, msg: 'Succesfully created new effect' });
           });
-        } else return res.json({ effect, msg: 'Effect already exists' });
+        } else return res.json({ replica, msg: 'Effect already exists' });
       });
   },
 ];
 
-// Deletes effect if there is no other reference to it
-// WIP FINISH WHEN ALL OTHER MODELS THAAT USE EFFECT ARE DONE
+// Deletes effect if there are no other reference to it
 exports.delete_effect = (req, res, next) => {
-
+  async.parallel({
+    character(callback) {
+      Character.findOne({ status: req.params.id })
+        .exec(callback);
+    },
+    item(callback) {
+      Item.findOne({ effects: req.params.id })
+        .exec(callback);
+    },
+    material(callback) {
+      Material.findOne({ effects: req.params.id })
+        .exec(callback);
+    },
+    race(callback) {
+      Race.findOne({ training: req.params.id })
+        .exec(callback);
+    },
+    skill(callback) {
+      Skill.findOne({ effects: req.params.id })
+        .exec(callback);
+    },
+    spell(callback) {
+      Spell.findOne({ effects: req.params.id })
+        .exec(callback);
+    },
+    title(callback) {
+      Title.findOne({ effects: req.params.id })
+        .exec(callback);
+    },
+  }, (err, results) => {
+    if (err) return res.status(404).json({ err, msg: 'Error retrieving results' });
+    if (Object.entries(results).every((value) => value[1] != null)) {
+      Effect.findByIdAndDelete(req.params.id, (err) => {
+        if (err) return res.status(404).json({ err, msg: 'Failed to remove effect' });
+        return res.json({ msg: 'Succesfully removed effect' });
+      });
+      return res.json({});
+    }
+    return res.json({ results, msg: 'There are still references to effect' });
+  });
 };

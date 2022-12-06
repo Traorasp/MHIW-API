@@ -6,8 +6,8 @@ const Character = require('../models/character');
 exports.get_skill_details = (req, res, next) => {
   Skill.findById(req.params.id)
     .exec((err, skill) => {
-      if (err) return res.json({ msg: 'There was an error getting skill' });
-      if (!skill) return res.json({ msg: 'No such skill exists' });
+      if (err) return res.status(404).json({ err, msg: 'Error retrieving skill' });
+      if (!skill) return res.status(404).json({ err, msg: 'Skill does not exist' });
       const promises = [];
       Object.entries(skill._doc).forEach(([key, value]) => {
         if (Array.isArray(value) && value.length > 0) {
@@ -22,7 +22,7 @@ exports.get_skill_details = (req, res, next) => {
 exports.get_skill_list = (req, res, next) => {
   Skill.find()
     .exec((err, skills) => {
-      if (err) return res.json({ msg: 'There was an error getting skills' });
+      if (err) return res.status(404).json({ err, msg: 'Error retrieving skills' });
       return res.json({ skills });
     });
 };
@@ -78,7 +78,7 @@ exports.post_skill = [
     }
     Skill.findOne(req.body)
       .exec((err, replica) => {
-        if (err) return next(err);
+        if (err) return res.status(404).json({ err, msg: 'Error retrieving replica' });
         if (!replica) {
           const skill = new Skill({});
           Object.keys(req.body).forEach((key) => {
@@ -87,9 +87,7 @@ exports.post_skill = [
             }
           });
           skill.save((err) => {
-            if (err) {
-              return next(err);
-            }
+            if (err) return res.status(404).json({ err, msg: 'Failed to save skill' });
             return res.json({ skill, msg: 'Skill succesfully created' });
           });
         } else {
@@ -149,7 +147,7 @@ exports.post_update_skill = [
     }
     Skill.findOne(req.body)
       .exec((err, replica) => {
-        if (err) return next(err);
+        if (err) return res.status(404).json({ err, msg: 'Error retrieving skill' });
         if (!replica) {
           const data = {};
           Object.keys(req.body).forEach((key) => {
@@ -158,7 +156,7 @@ exports.post_update_skill = [
             }
           });
           Skill.findByIdAndUpdate(req.body.id, data, (err, skill) => {
-            if (err) return next(err);
+            if (err) return res.status(404).json({ err, msg: 'Failed to save skill' });
             return res.json({ skill, msg: 'Succesfully updated skill' });
           });
         } else {
@@ -172,14 +170,14 @@ exports.post_update_skill = [
 exports.delete_skill = (req, res, next) => {
   Character.findOne({ skills: req.params.id })
     .exec((err, char) => {
-      if (err) return next(err);
+      if (err) return res.status(404).json({ err, msg: 'Error retrieving character' });
       if (!char) {
         Skill.findByIdAndDelete(req.params.id, (err) => {
-          if (err) return res.json({ msg: 'Error deleting skill' });
+          if (err) return res.status(404).json({ err, msg: 'Failed to remove skill' });
           return res.json({ msg: 'Succesfully removed skill' });
         });
       } else {
-        return res.json({ msg: 'There are still characters with the skill' });
+        return res.json({ msg: 'Characters still reference skill' });
       }
     });
 };

@@ -36,6 +36,8 @@ const CharacterSchema = new Schema({
     charisma: { type: Number, min: 0 },
     will: { type: Number, min: 0 },
     intimidation: { type: Number, min: 0 },
+    hiding: { type: Number, min: 0 },
+    tracking: { type: Number, min: 0 },
   },
   status: [{ type: Schema.Types.ObjectId, ref: 'Effect' }],
   skills: [{ type: Schema.Types.ObjectId, ref: 'Skill' }],

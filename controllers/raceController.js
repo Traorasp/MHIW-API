@@ -6,8 +6,8 @@ const Character = require('../models/character');
 exports.get_race_details = (req, res, next) => {
   Race.findById(req.params.id)
     .exec((err, race) => {
-      if (err) return res.json({ msg: 'There was an error getting race' });
-      if (!race) return res.json({ msg: 'No such race exists' });
+      if (err) return res.status(404).json({ err, msg: 'Error retrieving race' });
+      if (!race) return res.status(404).json({ err, msg: 'Race does not exists' });
       const promises = [];
       Object.entries(race._doc).forEach(([key, value]) => {
         if (Array.isArray(value) && value.length > 0) {
@@ -22,7 +22,7 @@ exports.get_race_details = (req, res, next) => {
 exports.get_race_list = (req, res, next) => {
   Race.find()
     .exec((err, races) => {
-      if (err) return res.json({ msg: 'There was an error getting races' });
+      if (err) return res.status(404).json({ err, msg: 'Error retrieving races' });
       return res.json({ races });
     });
 };
@@ -68,7 +68,7 @@ exports.post_race = [
       parent: req.body.name,
     })
       .exec((err, replica) => {
-        if (err) return next(err);
+        if (err) return res.status(404).json({ err, msg: 'Error retrieving replica' });
         if (!replica) {
           const race = new Race({});
           Object.keys(req.body).forEach((key) => {
@@ -78,7 +78,7 @@ exports.post_race = [
           });
           race.save((err) => {
             if (err) {
-              return next(err);
+              return res.status(404).json({ err, msg: 'Failed to save race' });
             }
             return res.json({ race, msg: 'Race succesfully created' });
           });
@@ -130,7 +130,7 @@ exports.post_update_race = [
       parent: req.body.name,
     })
       .exec((err, replica) => {
-        if (err) return next(err);
+        if (err) return res.status(404).json({ err, msg: 'Error retrieving replica' });
         if (!replica || replica.id == req.body.id) {
           const data = {};
           Object.keys(req.body).forEach((key) => {
@@ -139,9 +139,7 @@ exports.post_update_race = [
             }
           });
           Race.findByIdAndUpdate(req.body.id, data, (err, race) => {
-            if (err) {
-              return next(err);
-            }
+            if (err) return res.status(404).json({ err, msg: 'Failed to sae race' });
             return res.json({ race, msg: 'Race succesfully updated' });
           });
         } else {
@@ -155,14 +153,14 @@ exports.post_update_race = [
 exports.delete_race = (req, res, next) => {
   Character.findOne({ race: req.params.id })
     .exec((err, char) => {
-      if (err) return next(err);
+      if (err) return res.status(404).json({ err, msg: 'Error retrieving character' });
       if (!char) {
         Race.findByIdAndDelete(req.params.id, (err) => {
-          if (err) return res.json({ msg: 'Error deleting race' });
+          if (err) return res.status(404).json({ err, msg: 'Failed to remove race' });
           return res.json({ msg: 'Succesfully removed race' });
         });
       } else {
-        return res.json({ msg: 'There are still characters with the race' });
+        return res.json({ char, msg: 'Characters still reference race' });
       }
     });
 };

@@ -6,8 +6,8 @@ const Character = require('../models/character');
 exports.get_talent = (req, res, next) => {
   Talent.findById(req.params.id)
     .exec((err, talent) => {
-      if (err) return res.json({ msg: 'Error getting talent list' });
-      if (!talent) return res.json({ msg: 'No talent by that id exists' });
+      if (err) return res.status(404).json({ err, msg: 'Error retrieving talent' });
+      if (!talent) return res.status(404).json({ err, msg: 'Talent does not exist' });
       return res.json(talent);
     });
 };
@@ -16,7 +16,7 @@ exports.get_talent = (req, res, next) => {
 exports.get_talent_list = (req, res, next) => {
   Talent.find()
     .exec((err, talent) => {
-      if (err) return res.json({ msg: 'Error getting talent list' });
+      if (err) return res.status(404).json({ err, msg: 'Error retrieving talents' });
       return res.json(talent);
     });
 };
@@ -83,7 +83,7 @@ exports.post_talent = [
       description: req.body.description,
     })
       .exec((err, replica) => {
-        if (err) return next(err);
+        if (err) return res.status(404).json({ err, msg: 'Error retrieving replica' });
         if (!replica) {
           const talent = new Talent({
             name: req.body.name,
@@ -97,7 +97,7 @@ exports.post_talent = [
             description: req.body.description,
           });
           talent.save((err) => {
-            if (err) return next(err);
+            if (err) return res.status(404).json({ err, msg: 'Failed to save talent' });
             return res.json({ talent, msg: 'Succesfully created new talent' });
           });
         } else return res.json({ replica, msg: 'Talent already exists' });
@@ -167,7 +167,7 @@ exports.post_update_talent = [
       description: req.body.description,
     })
       .exec((err, replica) => {
-        if (err) return next(err);
+        if (err) return res.status(404).json({ err, msg: 'Error retrieving replica' });
         if (!replica) {
           const data = {
             name: req.body.name,
@@ -181,7 +181,7 @@ exports.post_update_talent = [
             description: req.body.description,
           };
           Talent.findByIdAndUpdate(req.body.id, data, (err, talent) => {
-            if (err) return next(err);
+            if (err) return res.status(404).json({ err, msg: 'Failed to save talent' });
             return res.json({ talent, msg: 'Succesfully updated talent' });
           });
         } else return res.json({ replica, msg: 'Talent already exists' });
@@ -193,10 +193,10 @@ exports.post_update_talent = [
 exports.delete_talent = (req, res, next) => {
   Character.findOne({ talents: req.params.id })
     .exec((err, char) => {
-      if (err) return res.json({ msg: 'There was an error getting character' });
+      if (err) return res.status(404).json({ err, msg: 'Error retrieving character' });
       if (!char) {
         Talent.findByIdAndDelete(req.params.id, (err) => {
-          if (err) return res.json({ msg: 'Error deleting talent' });
+          if (err) return res.status(404).json({ msg: 'Failed removing talent' });
           return res.json({ msg: 'Succesfully removed talent' });
         });
       } else {

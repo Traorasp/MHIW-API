@@ -7,8 +7,8 @@ const Enchantment = require('../models/enchantment');
 exports.get_item_details = (req, res, next) => {
   Item.findById(req.params.id)
     .exec((err, item) => {
-      if (err) return res.json({ msg: 'There was an error getting item' });
-      if (!item) return res.json({ msg: 'No such item exists' });
+      if (err) return res.status(404).json({ err, msg: 'Error retrieving item' });
+      if (!item) return res.status(404).json({ err, msg: 'No such item exists' });
       const promises = [];
       Object.entries(item._doc).forEach(([key, value]) => {
         if (Array.isArray(value) && value.length > 0) {
@@ -25,7 +25,7 @@ exports.get_item_details = (req, res, next) => {
 exports.get_item_list = (req, res, next) => {
   Item.find()
     .exec((err, items) => {
-      if (err) return res.json({ msg: 'There was an error getting items' });
+      if (err) return res.status(404).json({ err, msg: 'Error retrieving items' });
       return res.json({ items });
     });
 };
@@ -86,28 +86,28 @@ exports.post_item = [
       });
       let max = 0;
       switch (req.body.rarity) {
-        case 'VC':
+        case 'VeryCommon':
           max = 1;
           break;
-        case 'C':
+        case 'Common':
           max = 2;
           break;
-        case 'UC':
+        case 'UnCommon':
           max = 3;
           break;
-        case 'R':
+        case 'Rare':
           max = 4;
           break;
-        case 'U':
+        case 'Unique':
           max = 5;
           break;
-        case 'E':
+        case 'Epic':
           max = 6;
           break;
-        case 'L':
+        case 'Legendary':
           max = 7;
           break;
-        case 'M':
+        case 'Mythical':
           max = 8;
           break;
         default:
@@ -134,7 +134,7 @@ exports.post_item = [
     });
 
     item.save((err) => {
-      if (err) return res.json({ err, msg: 'Failed to save changes' });
+      if (err) return res.status(404).json({ err, msg: 'Failed to save changes' });
       return res.json({ msg: 'Sucesfully created item', item });
     });
   },
@@ -196,28 +196,28 @@ exports.post_update_item = [
       });
       let max = 0;
       switch (req.body.rarity) {
-        case 'VC':
+        case 'VeryCommon':
           max = 1;
           break;
-        case 'C':
+        case 'Common':
           max = 2;
           break;
-        case 'UC':
+        case 'UnCommon':
           max = 3;
           break;
-        case 'R':
+        case 'Rare':
           max = 4;
           break;
-        case 'U':
+        case 'Unique':
           max = 5;
           break;
-        case 'E':
+        case 'Epic':
           max = 6;
           break;
-        case 'L':
+        case 'Legendary':
           max = 7;
           break;
-        case 'M':
+        case 'Mythical':
           max = 8;
           break;
         default:
@@ -239,7 +239,7 @@ exports.post_update_item = [
 
     Item.findById(req.body.id)
       .exec((err, item) => {
-        if (err) return res.json({ msg: 'There was an error' });
+        if (err) return res.status(404).json({ err, msg: 'Error retrieving item' });
         if (!item) return res.json({ msg: 'No such item exists' });
         Object.keys(req.body).forEach((key) => {
           if (req.body[key] != undefined && req.body[key] != []) {
@@ -258,10 +258,10 @@ exports.post_update_item = [
 exports.delete_item = (req, res, next) => {
   Item.findById(req.params.id)
     .exec((err, item) => {
-      if (err) return res.json({ msg: 'There was an error' });
-      if (!item) return res.json({ msg: 'No such item exists' });
+      if (err) return res.status(404).json({ err, msg: 'Error retrieving item' });
+      if (!item) return res.status(404).json({ err, msg: 'Item does not exist' });
       item.remove((err) => {
-        if (err) return res.json({ msg: 'Failed to remove this item' });
+        if (err) return res.status(404).json({ msg: 'Failed to remove item' });
         return res.json({ msg: 'Sucesfully removed item' });
       });
     });
