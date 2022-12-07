@@ -37,7 +37,7 @@ exports.post_race = [
     .trim()
     .isLength({ min: 1 })
     .escape(),
-  body('weakness*', '')
+  body('weakness.*', '')
     .trim()
     .optional({ checkFalsy: true })
     .isLength({ min: 1 })
@@ -45,7 +45,7 @@ exports.post_race = [
   body('limit', 'Race must have a limit')
     .trim()
     .isInt({ min: 0 })
-    .withMessage('Limit must be a positivee number')
+    .withMessage('Limit must be a positive number')
     .escape(),
   body('baseStats.*', 'Race must have all stats')
     .trim()

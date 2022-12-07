@@ -99,9 +99,7 @@ exports.post_update_material = [
             effects: req.body.effects,
           };
           Material.findByIdAndUpdate(req.body.id, data, (err, material) => {
-            if (err) {
-              return res.status(404).json({ err, msg: 'Failed to save material' });
-            }
+            if (err) return res.status(404).json({ err, msg: 'Failed to save material' });
             return res.json({ material, msg: 'Succesfully updated material' });
           });
         } else {
@@ -113,15 +111,16 @@ exports.post_update_material = [
 
 // deletes material if there are no references to it
 exports.delete_material = (req, res, next) => {
-  Item.findOne({material : req.param.id}) {
-    if(err) return res.status(404).json({err, msg: 'Error retrieving item'})
-    if(!item) {
-      Material.findByIdAndDelete(req.params.id, (err) => {
-        if(err) return res.status(404).json({err, msg: 'Failed to remove material'})
-        return res.json({msg : 'Succesfully removed material'})
-      })
-    } else {
-      return res.json({item, msg: 'Items still reference material'})
-    }
-  }
+  Item.findOne({ material: req.param.id })
+    .exec((err, item) => {
+      if (err) return res.status(404).json({ err, msg: 'Error retrieving item' });
+      if (!item) {
+        Material.findByIdAndDelete(req.params.id, (err) => {
+          if (err) return res.status(404).json({ err, msg: 'Failed to remove material' });
+          return res.json({ msg: 'Succesfully removed material' });
+        });
+      } else {
+        return res.json({ item, msg: 'Items still reference material' });
+      }
+    });
 };

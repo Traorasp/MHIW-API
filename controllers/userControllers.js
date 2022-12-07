@@ -47,18 +47,24 @@ exports.register_post = [
         errors: errors.array(),
       });
     }
+    User.findOne({ name: req.body.username })
+      .exec((err, user) => {
+        if (err) return res.status(404).json({ err, msg: 'Error retrieving other users' });
+        if (!user) {
+          bcrypt.hash(req.body.password, 12, (err, hashedPassword) => {
+            if (err) return res.status(500).json({ err, msg: 'Error hashing password' });
 
-    bcrypt.hash(req.body.password, 12, (err, hashedPassword) => {
-      if (err) return res.status(500).json({ err, msg: 'Error hashing password' });
-
-      new User({
-        username: req.body.username,
-        password: hashedPassword,
-      }).save(() => {
-        if (err) return res.status(404)({ err, msg: 'Failed to save user' });
-        return res.json({ msg: 'Sucesfully registered' });
+            new User({
+              username: req.body.username,
+              password: hashedPassword,
+            }).save(() => {
+              if (err) return res.status(404)({ err, msg: 'Failed to save user' });
+              return res.json({ msg: 'Sucesfully registered' });
+            });
+          });
+        }
+        return res.status(400).json({ msg: 'Username is already taken' });
       });
-    });
   },
 ];
 

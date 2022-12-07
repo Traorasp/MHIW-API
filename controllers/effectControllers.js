@@ -9,6 +9,16 @@ const Skill = require('../models/skill');
 const Spell = require('../models/spell');
 const Title = require('../models/title');
 
+// Returns informatin of a specific effect
+exports.get_effect = (req, res, next) => {
+  Effect.findById(req.params.id)
+    .exec((err, effect) => {
+      if (err) return res.status(404).json({ err, msg: 'Failed to retrieve effect' });
+      if (!effect) return res.status(404).json({ err, msg: 'Effect does not exist' });
+      return res.json(effect);
+    });
+};
+
 // Returns all effects in the database
 exports.get_effect_list = (req, res, next) => {
   Effect.find()
@@ -86,6 +96,78 @@ exports.post_effect = [
           effect.save((err) => {
             if (err) return res.status(404).json({ err, msg: 'Failed to save effect' });
             return res.json({ effect, msg: 'Succesfully created new effect' });
+          });
+        } else return res.json({ replica, msg: 'Effect already exists' });
+      });
+  },
+];
+
+exports.post_update_effect = [
+  body('name', 'Name cannot be empty')
+    .trim()
+    .isLength({ min: 1 })
+    .escape(),
+  body('damageType', '')
+    .trim()
+    .optional({ checkFalsy: true })
+    .escape(),
+  body('damage', '')
+    .trim()
+    .optional({ checkFalsy: true })
+    .escape(),
+  body('training', '')
+    .trim()
+    .optional({ checkFalsy: true })
+    .escape(),
+  body('stat', '')
+    .trim()
+    .optional({ checkFalsy: true })
+    .escape(),
+  body('property', '')
+    .trim()
+    .optional({ checkFalsy: true })
+    .escape(),
+  body('effect', '')
+    .trim()
+    .optional({ checkFalsy: true })
+    .escape(),
+  body('duration', 'Duration cannot be empty')
+    .trim()
+    .isInt({ min: 1 })
+    .withMessage('Duration cannot be less than 1 round')
+    .escape(),
+  (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.json({ data: req.body, errors });
+    }
+
+    Effect.findOne({
+      name: req.body.name,
+      damageType: req.body.damageType,
+      damage: req.body.damage,
+      training: req.body.training,
+      stat: req.body.stat,
+      property: req.body.property,
+      effect: req.body.effect,
+      duration: req.body.duration,
+    })
+      .exec((err, replica) => {
+        if (err) return res.status(404).json({ err, msg: 'Error retrieving replica' });
+        if (!replica) {
+          const data = {
+            name: req.body.name,
+            damageType: req.body.damageType,
+            damage: req.body.damage,
+            training: req.body.training,
+            stat: req.body.stat,
+            property: req.body.property,
+            effect: req.body.effect,
+            duration: req.body.duration,
+          };
+          Effect.findByIdAndUpdate(req.body.id, data, (err, effect) => {
+            if (err) return res.status(404).json({ err, msg: 'Failed to save effect' });
+            return res.json({ effect, msg: 'Succesfully updated effect' });
           });
         } else return res.json({ replica, msg: 'Effect already exists' });
       });

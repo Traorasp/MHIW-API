@@ -79,11 +79,17 @@ router.delete('/character/:id', charCont.delete_character);
 
 /// EFFECT ROUTES ///
 
+// GET info of specific effect
+router.get('/effect/:id', effectCont.get_effect);
+
 // GET info of all existing effects
 router.get('/effects', effectCont.get_effect_list);
 
 // POST to create a new effect
 router.post('/effect', effectCont.post_effect);
+
+// POST to update an effect
+router.post('/effect/update', effectCont.post_update_effect);
 
 // DELETE an existing effect
 router.delete('/effect/:id', effectCont.delete_effect);

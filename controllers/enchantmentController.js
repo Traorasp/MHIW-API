@@ -76,7 +76,7 @@ exports.post_enchantment = [
 
 // Deletes a specified enchantment if no references point to it
 exports.delete_enchantment = (req, res, next) => {
-  Item.find({ enchantments: req.params.id })
+  Item.findOne({ enchantments: req.params.id })
     .exec((err, items) => {
       if (err) return res.status(404).json({ err, msg: 'Error retrieving item' });
       if (items.length < 1) {

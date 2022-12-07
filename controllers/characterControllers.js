@@ -113,16 +113,12 @@ exports.post_update_character = [
     .trim()
     .optional({ checkFalsy: true })
     .escape(),
-  body('baseStats', '')
+  body('baseStats.*', '')
+    .trim()
     .optional({ checkFalsy: true })
-    .custom((stats) => {
-      Object.values(stats).forEach((values) => {
-        if (values < 0) {
-          throw new Error('Stats cannot be negative');
-        }
-      });
-      return true;
-    }),
+    .isInt({ min: 0 })
+    .withMessage('Base stat must be a positive number')
+    .escape(),
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
