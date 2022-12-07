@@ -17,6 +17,7 @@ const talentCont = require('../controllers/talentControllers');
 const skillCont = require('../controllers/skillController');
 const raceCont = require('../controllers/raceController');
 const titleCont = require('../controllers/titleController');
+
 /// IMAGE Routes ///
 
 // GET image with its id
@@ -35,6 +36,12 @@ router.delete('/image/:id', imageCont.delete_image);
 
 // POST request for login in
 router.post('/', userCont.login_post);
+
+// GET request to refresh authoricaion token
+router.get('/refresh', userCont.refresh_auth_token);
+
+// POST request to logout and clear cookie
+router.post('/logout', userCont.logout);
 
 // POST request for register
 router.post('/register', userCont.register_post);

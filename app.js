@@ -58,7 +58,7 @@ passport.use(
   new JWTStrategy(
     {
       jwtFromRequest: extractJWT.fromAuthHeaderAsBearerToken(),
-      secretOrKey: 'cats',
+      secretOrKey: process.env.ACCESS_SECRET_KEY,
     },
     (jwtPayload, done) => done(null, jwtPayload),
   ),
@@ -81,7 +81,6 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(helmet());
 app.use(compression()); // Compresses routes
-
 app.use('/', verifyToken, catalogRouter);
 
 // catch 404 and forward to error handler

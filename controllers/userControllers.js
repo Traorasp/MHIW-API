@@ -2,6 +2,7 @@ const bcrypt = require('bcrypt');
 const { body, validationResult } = require('express-validator');
 const passport = require('passport');
 const jwt = require('jsonwebtoken');
+const dotenv = require('dotenv').config();
 const User = require('../models/user');
 
 // Authorizes users to log in
@@ -17,10 +18,54 @@ exports.login_post = (req, res, next) => {
 
     req.login(user, { session: false }, () => {
       if (err) return next(err);
-      const token = jwt.sign({ user }, 'cats');
+      const token = jwt.sign({ user }, process.env.ACCESS_SECRET_KEY, { expiresIn: '15m' });
+      const refreshToken = jwt.sign(
+        { userId: user.id },
+        process.env.REFRESH_SECRET_KEY,
+        { expiresIn: '7d' },
+      );
+      res.cookie('jwt', refreshToken, {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'None',
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+      });
       return res.json({ user, token });
     });
   })(req, res);
+};
+
+exports.refresh_auth_token = (req, res, next) => {
+  const { cookies } = req;
+  if (!cookies?.jwt) return res.status(401).json({ msg: 'Unauthorized' });
+  const refreshToken = cookies.jwt;
+
+  jwt.verify(
+    refreshToken,
+    process.env.REFRESH_SECRET_KEY,
+    async (err, decoded) => {
+      if (err) return res.status(403).json({ err, msg: 'Forbidden' });
+      User.findById(decoded.userId)
+        .exec((err, user) => {
+          if (err) return res.status(404).json({ err, msg: 'Error retrieving user' });
+          if (!user) return res.status(404).json({ err, msg: 'User does ot exist' });
+          const accessToken = jwt.sign({ user }, process.env.ACCESS_SECRET_KEY, { expiresIn: '15m' });
+
+          res.json({ accessToken });
+        });
+    },
+  );
+};
+
+exports.logout = (req, res, next) => {
+  const { cookies } = req;
+  if (!cookies?.jwt) return res.sendStatus(204);
+  res.clearCookie('jwt', {
+    httpOnly: true,
+    sameSite: 'None',
+    secure: true,
+  });
+  res.json({ message: 'Cookie cleared' });
 };
 
 // Allows users to register and make an acount, encrypts password with bcrypt

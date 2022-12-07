@@ -53,7 +53,7 @@ exports.post_create_character = [
       });
     }
     const char = new Character({
-      owner: req.body.id,
+      owner: req.id,
       firstName: req.body.firstName,
       lastName: req.body.lastName,
       level: req.body.level,
@@ -128,7 +128,7 @@ exports.post_update_character = [
       .exec((err, char) => {
         if (err) return res.status(404).json({ err, msg: 'Error retrieving character' });
         if (!char) return res.status(404).json({ err, msg: 'Character does not exist' });
-        if (char.owner != req.body.owner) return res.status(403).json({ err, msg: 'User does not own this character' });
+        if (char.owner != req.id) return res.status(403).json({ err, msg: 'User does not own this character' });
         Object.keys(req.body).forEach((key) => {
           if (req.body[key] != undefined && req.body[key] != []) {
             char[key] = req.body[key];
@@ -149,7 +149,7 @@ exports.delete_character = (req, res, next) => {
     .exec((err, char) => {
       if (err) return res.status(404).json({ err, msg: 'Error retrieving characters' });
       if (!char) return res.status(404).json({ err, msg: 'Character does not exist' });
-      if (char.owner != req.body.owner) {
+      if (char.owner != req.id) {
         return res.status(403).json({ err, msg: 'User does not own this character' });
       }
       char.remove((err) => {
