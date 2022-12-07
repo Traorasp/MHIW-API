@@ -48,10 +48,4 @@ const CharacterSchema = new Schema({
   background: { type: String },
 });
 
-// Gets training buffs from all skills and items
-CharacterSchema.virtual('training').get(() => 'WIP');
-// Gets buffs from items, skills and status to get percentage increase to stats
-// also gets value of stats that can only increase from items and skills
-CharacterSchema.virtual('realStats').get(() => 'WIP');
-
 module.exports = mongoose.model('Character', CharacterSchema);

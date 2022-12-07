@@ -28,12 +28,7 @@ exports.get_enchantment_list = (req, res, next) => {
 
 // Creates new enchantment and returns its id
 exports.post_enchantment = [
-  body('level', 'Item must have a level')
-    .trim()
-    .isInt({ min: 1, max: 18 })
-    .withMessage('Level must be between 1 and 18')
-    .escape(),
-  body('amount', 'Item must have an amount')
+  body('amount', 'Enchantment must have an amount')
     .trim()
     .isInt({ min: 1, max: 8 })
     .withMessage('Amount must be between 1 and 8')
@@ -48,7 +43,6 @@ exports.post_enchantment = [
     }
 
     Enchantment.findOne({
-      level: req.body.level,
       amount: req.body.amount,
       skill: req.params.skill,
       spell: req.body.spell,
