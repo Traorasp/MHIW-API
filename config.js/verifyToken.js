@@ -17,7 +17,8 @@ function verifyToken(req, res, next) {
       process.env.ACCESS_SECRET_KEY,
       (err, decoded) => {
         if (err) return res.status(403).json({ err, msg: 'Forbidden' });
-        req.id = decoded.userId;
+        req.id = decoded.user.id;
+        req.admin = decoded.user.admin;
         next();
       },
     );

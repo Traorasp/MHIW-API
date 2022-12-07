@@ -25,8 +25,4 @@ const ItemSchema = new Schema({
   background: { type: String },
 });
 
-// Gets buffs from items, skills and status to get percentage increase to stats
-// also gets value of stats that can only increase from items and skills
-ItemSchema.virtual('realStats').get(() => 'WIP');
-
 module.exports = mongoose.model('Item', ItemSchema);

@@ -2,6 +2,8 @@ const express = require('express');
 
 const router = express.Router();
 
+const verifyAdmin = require('../config.js/verifyAdmin');
+
 // Requires controllers
 const imageCont = require('../controllers/imageControllers');
 const userCont = require('../controllers/userControllers');
@@ -93,13 +95,13 @@ router.get('/effect/:id', effectCont.get_effect);
 router.get('/effects', effectCont.get_effect_list);
 
 // POST to create a new effect
-router.post('/effect', effectCont.post_effect);
+router.post('/effect', verifyAdmin, effectCont.post_effect);
 
 // POST to update an effect
-router.post('/effect/update', effectCont.post_update_effect);
+router.post('/effect/update', verifyAdmin, effectCont.post_update_effect);
 
 // DELETE an existing effect
-router.delete('/effect/:id', effectCont.delete_effect);
+router.delete('/effect/:id', verifyAdmin, effectCont.delete_effect);
 
 /// MATERIAL ROUTES ///
 
@@ -110,13 +112,13 @@ router.get('/material/:id', materCont.get_material_details);
 router.get('/materials', materCont.get_material_list);
 
 // POST a new material if it dpesn't already exist
-router.post('/material', materCont.post_material);
+router.post('/material', verifyAdmin, materCont.post_material);
 
 // POST update a material if exact one doesn't alreayd exist
-router.post('/material/update', materCont.post_update_material);
+router.post('/material/update', verifyAdmin, materCont.post_update_material);
 
 // DELETE a material and its references
-router.delete('/material/:id', materCont.delete_material);
+router.delete('/material/:id', verifyAdmin, materCont.delete_material);
 
 /// ITEM ROUTES ///
 
@@ -127,13 +129,13 @@ router.get('/item/:id', itemCont.get_item_details);
 router.get('/items', itemCont.get_item_list);
 
 // POST a new item
-router.post('/item', itemCont.post_item);
+router.post('/item', verifyAdmin, itemCont.post_item);
 
 // POST update an item
-router.post('/item/update', itemCont.post_update_item);
+router.post('/item/update', verifyAdmin, itemCont.post_update_item);
 
 // DELETE an item
-router.delete('/item/:id', itemCont.delete_item);
+router.delete('/item/:id', verifyAdmin, itemCont.delete_item);
 
 /// ENCHANTMENT ROUTES ///
 
@@ -147,7 +149,7 @@ router.get('/enchantments', enchCont.get_enchantment_list);
 router.post('/enchantment', enchCont.post_enchantment);
 
 // DELETE an enchantment
-router.delete('/enchantment/:id', enchCont.delete_enchantment);
+router.delete('/enchantment/:id', verifyAdmin, enchCont.delete_enchantment);
 
 /// SPELL ROUTES ///
 
@@ -158,13 +160,13 @@ router.get('/spell/:id', spellCont.get_spell_details);
 router.get('/spells', spellCont.get_spell_list);
 
 // POST a new spell
-router.post('/spell', spellCont.post_spell);
+router.post('/spell', verifyAdmin, spellCont.post_spell);
 
 // POST an update to an old spell
-router.post('/spell/update', spellCont.post_update_spell);
+router.post('/spell/update', verifyAdmin, spellCont.post_update_spell);
 
 // DELETE a spell
-router.delete('/spell/:id', spellCont.delete_spell);
+router.delete('/spell/:id', verifyAdmin, spellCont.delete_spell);
 
 /// MAGIC ROUTES ///
 
@@ -175,13 +177,13 @@ router.get('/magic/:id', magicCont.get_magic_details);
 router.get('/magics', magicCont.get_magic_list);
 
 // POST a new magic
-router.post('/magic', magicCont.post_magic);
+router.post('/magic', verifyAdmin, magicCont.post_magic);
 
 // POST an update to an old magic
-router.post('/magic/update', magicCont.post_update_magic);
+router.post('/magic/update', verifyAdmin, magicCont.post_update_magic);
 
 // DELETE a magic
-router.delete('/magic/:id', magicCont.delete_magic);
+router.delete('/magic/:id', verifyAdmin, magicCont.delete_magic);
 
 /// AOE ROUTES ///
 
@@ -189,13 +191,13 @@ router.delete('/magic/:id', magicCont.delete_magic);
 router.get('/aoe', aoeCont.get_aoe);
 
 // POST a new aoe
-router.post('/aoe', aoeCont.post_aoe);
+router.post('/aoe', verifyAdmin, aoeCont.post_aoe);
 
 // POST update to an aoe
-router.post('/aoe/update', aoeCont.post_update_aoe);
+router.post('/aoe/update', verifyAdmin, aoeCont.post_update_aoe);
 
 // Delete a specific aoe
-router.delete('/aoe/:id', aoeCont.delete_aoe);
+router.delete('/aoe/:id', verifyAdmin, aoeCont.delete_aoe);
 
 /// TALENT ROUTES ///
 
@@ -206,13 +208,13 @@ router.get('/talent/:id', talentCont.get_talent);
 router.get('/talents', talentCont.get_talent_list);
 
 // POST a new talent
-router.post('/talent', talentCont.post_talent);
+router.post('/talent', verifyAdmin, talentCont.post_talent);
 
 // POST update to a talent
-router.post('/talent/update', talentCont.post_update_talent);
+router.post('/talent/update', verifyAdmin, talentCont.post_update_talent);
 
 // Delete a specific talent
-router.delete('/talent/:id', talentCont.delete_talent);
+router.delete('/talent/:id', verifyAdmin, talentCont.delete_talent);
 
 /// SKILL ROTES ///
 
@@ -223,13 +225,13 @@ router.get('/skill/:id', skillCont.get_skill_details);
 router.get('/skills', skillCont.get_skill_list);
 
 // POST a new skill
-router.post('/skill', skillCont.post_skill);
+router.post('/skill', verifyAdmin, skillCont.post_skill);
 
 // POST update to a skill
-router.post('/skill/update', skillCont.post_update_skill);
+router.post('/skill/update', verifyAdmin, skillCont.post_update_skill);
 
 // Delete a specific skill
-router.delete('/skill/:id', skillCont.delete_skill);
+router.delete('/skill/:id', verifyAdmin, skillCont.delete_skill);
 
 /// RACE ROTES ///
 
@@ -240,13 +242,13 @@ router.get('/race/:id', raceCont.get_race_details);
 router.get('/races', raceCont.get_race_list);
 
 // POST a new race
-router.post('/race', raceCont.post_race);
+router.post('/race', verifyAdmin, raceCont.post_race);
 
 // POST update to a race
-router.post('/race/update', raceCont.post_update_race);
+router.post('/race/update', verifyAdmin, raceCont.post_update_race);
 
 // Delete a specific race
-router.delete('/race/:id', raceCont.delete_race);
+router.delete('/race/:id', verifyAdmin, raceCont.delete_race);
 
 /// TITLE ROTES ///
 
@@ -257,12 +259,12 @@ router.get('/title/:id', titleCont.get_title_details);
 router.get('/titles', titleCont.get_title_list);
 
 // POST a new title
-router.post('/title', titleCont.post_title);
+router.post('/title', verifyAdmin, titleCont.post_title);
 
 // POST update to a title
-router.post('/title/update', titleCont.post_update_title);
+router.post('/title/update', verifyAdmin, titleCont.post_update_title);
 
 // Delete a specific title
-router.delete('/title/:id', titleCont.delete_title);
+router.delete('/title/:id', verifyAdmin, titleCont.delete_title);
 
 module.exports = router;

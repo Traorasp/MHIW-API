@@ -20,7 +20,7 @@ exports.login_post = (req, res, next) => {
       if (err) return next(err);
       const token = jwt.sign({ user }, process.env.ACCESS_SECRET_KEY, { expiresIn: '15m' });
       const refreshToken = jwt.sign(
-        { userId: user.id },
+        { user },
         process.env.REFRESH_SECRET_KEY,
         { expiresIn: '7d' },
       );
@@ -92,7 +92,7 @@ exports.register_post = [
         errors: errors.array(),
       });
     }
-    User.findOne({ name: req.body.username })
+    User.findOne({ username: req.body.username })
       .exec((err, user) => {
         if (err) return res.status(404).json({ err, msg: 'Error retrieving other users' });
         if (!user) {
@@ -102,13 +102,15 @@ exports.register_post = [
             new User({
               username: req.body.username,
               password: hashedPassword,
+              admin: false,
             }).save(() => {
               if (err) return res.status(404)({ err, msg: 'Failed to save user' });
               return res.json({ msg: 'Sucesfully registered' });
             });
           });
+        } else {
+          return res.status(400).json({ msg: 'Username is already taken' });
         }
-        return res.status(400).json({ msg: 'Username is already taken' });
       });
   },
 ];
