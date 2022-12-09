@@ -15,9 +15,11 @@ const methodOverride = require('method-override');
 const bodyParser = require('body-parser');
 const compression = require('compression');
 const helmet = require('helmet');
+const cors = require('cors');
 const User = require('./models/user');
 const catalogRouter = require('./routes/catalog');
 const verifyToken = require('./config.js/verifyToken');
+const corsOptions = require('./config.js/corsOptions');
 
 // Set up default mongoose connection
 mongoose.connect(process.env.MONGOKEY, { useNewUrlParser: true, useUnifiedTopology: true });
@@ -72,6 +74,7 @@ app.use(passport.session());
 app.use(express.urlencoded({ extended: false }));
 
 // Initializes other middleware
+app.use(cors(corsOptions));
 app.use(bodyParser.json());
 app.use(methodOverride('_method'));
 app.use(logger('dev'));
