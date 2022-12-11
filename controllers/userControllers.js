@@ -45,13 +45,13 @@ exports.refresh_auth_token = (req, res, next) => {
     process.env.REFRESH_SECRET_KEY,
     async (err, decoded) => {
       if (err) return res.status(403).json({ err, msg: 'Forbidden' });
-      User.findById(decoded.userId)
+      User.findById(decoded.user._id)
         .exec((err, user) => {
           if (err) return res.status(404).json({ err, msg: 'Error retrieving user' });
           if (!user) return res.status(404).json({ err, msg: 'User does ot exist' });
-          const accessToken = jwt.sign({ user }, process.env.ACCESS_SECRET_KEY, { expiresIn: '15m' });
+          const token = jwt.sign({ user }, process.env.ACCESS_SECRET_KEY, { expiresIn: '15m' });
 
-          res.json({ accessToken });
+          res.json({ user, token });
         });
     },
   );
@@ -72,13 +72,12 @@ exports.logout = (req, res, next) => {
 exports.register_post = [
   body('username', 'Username cannot be empty')
     .trim()
-    .isLength({ min: 1 })
-    .isLength({ max: 30 })
-    .withMessage('Password cannot be longer than 30 characters')
+    .isLength({ min: 1, max: 30 })
+    .withMessage('Username cannot be longer than 30 characters')
     .escape(),
   body('password', 'Password cannot be empty')
     .trim()
-    .isLength({ max: 30 })
+    .isLength({ min: 1, max: 30 })
     .withMessage('Password cannot be longer than 30 characters')
     .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/, 'i')
     .withMessage('Password must be atleast 6 characters with atleast 1 uppercase, one lower case and a special character')
@@ -87,15 +86,15 @@ exports.register_post = [
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
-      return res.json({
+      return res.status(400).json({
         data: req.body,
         errors: errors.array(),
       });
     }
     User.findOne({ username: req.body.username })
-      .exec((err, user) => {
+      .exec((err, replica) => {
         if (err) return res.status(404).json({ err, msg: 'Error retrieving other users' });
-        if (!user) {
+        if (!replica) {
           bcrypt.hash(req.body.password, 12, (err, hashedPassword) => {
             if (err) return res.status(500).json({ err, msg: 'Error hashing password' });
 
@@ -103,9 +102,24 @@ exports.register_post = [
               username: req.body.username,
               password: hashedPassword,
               admin: false,
-            }).save(() => {
+            }).save((err, user) => {
               if (err) return res.status(404)({ err, msg: 'Failed to save user' });
-              return res.json({ msg: 'Sucesfully registered' });
+              req.login(user, { session: false }, () => {
+                if (err) return next(err);
+                const token = jwt.sign({ user }, process.env.ACCESS_SECRET_KEY, { expiresIn: '15m' });
+                const refreshToken = jwt.sign(
+                  { user },
+                  process.env.REFRESH_SECRET_KEY,
+                  { expiresIn: '7d' },
+                );
+                res.cookie('jwt', refreshToken, {
+                  httpOnly: true,
+                  secure: true,
+                  sameSite: 'None',
+                  maxAge: 7 * 24 * 60 * 60 * 1000,
+                });
+                return res.json({ user, token });
+              });
             });
           });
         } else {
