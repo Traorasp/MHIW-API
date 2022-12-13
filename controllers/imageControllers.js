@@ -18,7 +18,7 @@ exports.post_image = [
   upload,
   (req, res, next) => {
     if (!req.file) {
-      return res.json({ msg: 'There is no image file attached' });
+      return res.status(400).json({ msg: 'There is no image file attached' });
     }
     const _id = new mongoose.Types.ObjectId(req.file.id);
     return res.json({ imageId: _id, msg: 'Sucessfully posted new image' });

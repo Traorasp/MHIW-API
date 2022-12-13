@@ -48,7 +48,7 @@ module.exports = (req, res, next) => {
     if (err) {
       if (err === 'filetype') return res.status(400).json({ msg: 'Image files onlys' });
 
-      return res.sendStatus(500);
+      return res.Status(500).json(err);
     }
     next();
   });

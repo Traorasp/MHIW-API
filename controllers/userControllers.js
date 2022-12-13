@@ -137,10 +137,13 @@ exports.post_new_profile = (req, res, next) => {
       if (!user) {
         return res.status(404).json({ err, msg: 'User does not exist' });
       }
-      user.profilePic = req.params.id;
+      if (!req.body.imageId) {
+        return res.status(400).json({ err, msg: 'There is no imageid' });
+      }
+      user.profilePic = req.body.imageId;
       user.save(() => {
         if (err) return res.status(404).json({ err, msg: 'Failed to save profile' });
-        return res.json({ imageId: req.params.id, msg: 'Sucesfully changed profile' });
+        return res.json({ imageId: req.body.imageId, msg: 'Sucesfully changed profile' });
       });
     });
 };
