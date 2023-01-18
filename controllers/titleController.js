@@ -35,8 +35,8 @@ exports.post_title = [
     .escape(),
   body('level', 'Title must have a level')
     .trim()
-    .isInt({ min: 1, max: 18 })
-    .withMessage('Level must be within 1 and 18')
+    .isInt({ min: 1, max: 15 })
+    .withMessage('Level must be within 1 and 15')
     .escape(),
   body('description', 'Title must have a description')
     .trim()
@@ -82,8 +82,8 @@ exports.post_update_title = [
     .escape(),
   body('level', 'Title must have a level')
     .trim()
-    .isInt({ min: 1, max: 18 })
-    .withMessage('Level must be within 1 and 18')
+    .isInt({ min: 1, max: 15 })
+    .withMessage('Level must be within 1 and 15')
     .escape(),
   body('description', 'Title must have a description')
     .trim()

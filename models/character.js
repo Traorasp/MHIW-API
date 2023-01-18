@@ -18,7 +18,7 @@ const CharacterSchema = new Schema({
   race: { type: Schema.Types.ObjectId, ref: 'Race' },
   gender: { type: String },
   level: {
-    type: Number, required: true, min: 1, max: 18,
+    type: Number, required: true, min: 1, max: 15,
   },
   titles: [{ type: Schema.Types.ObjectId, ref: 'Title' }],
   magics: [{ type: Schema.Types.ObjectId, ref: 'Magic' }],

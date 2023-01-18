@@ -42,8 +42,8 @@ exports.post_item = [
     .escape(),
   body('level', 'Item must have a level')
     .trim()
-    .isInt({ min: 1, max: 18 })
-    .withMessage('Level must be between 1 and 18')
+    .isInt({ min: 1, max: 15 })
+    .withMessage('Level must be between 1 and 15')
     .escape(),
   body('cost', 'Iteme must have a positive cost')
     .trim()
@@ -152,8 +152,8 @@ exports.post_update_item = [
     .escape(),
   body('level', 'Item must have a level')
     .trim()
-    .isInt({ min: 1, max: 18 })
-    .withMessage('Level must be between 1 and 18')
+    .isInt({ min: 1, max: 15 })
+    .withMessage('Level must be between 1 and 15')
     .escape(),
   body('cost', 'Iteme must have a positive cost')
     .trim()

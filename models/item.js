@@ -7,7 +7,7 @@ const ItemSchema = new Schema({
   rarity: { type: String, require: true, minLength: 1 },
   image: { type: Schema.Types.ObjectId, ref: 'images.files' },
   level: {
-    type: Number, required: true, min: 1, max: 18,
+    type: Number, required: true, min: 1, max: 15,
   },
   material: { type: Schema.Types.ObjectId, ref: 'Material' },
   subStat: [{ type: Schema.Types.ObjectId, ref: 'Effect' }],

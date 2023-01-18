@@ -40,8 +40,8 @@ exports.post_create_character = [
     .escape(),
   body('level', 'Character must have a level')
     .trim()
-    .isInt({ min: 1, max: 18 })
-    .withMessage('Level must be an integer between 1 and 18')
+    .isInt({ min: 1, max: 15 })
+    .withMessage('Level must be an integer between 1 and 15')
     .escape(),
   (req, res, next) => {
     const errors = validationResult(req);
@@ -76,8 +76,8 @@ exports.post_update_character = [
     .escape(),
   body('level', 'Character must have a level')
     .trim()
-    .isInt({ min: 1, max: 18 })
-    .withMessage('Level must be an integer between 1 and 18')
+    .isInt({ min: 1, max: 15 })
+    .withMessage('Level must be an integer between 1 and 15')
     .escape(),
   body('raceSkill', '')
     .optional({ checkFalsy: true })

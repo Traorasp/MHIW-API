@@ -6,7 +6,7 @@ exports.get_image = (req, res, next) => {
   const _id = new mongoose.Types.ObjectId(req.params.id);
   req.app.locals.gfs.find({ _id }).toArray((err, image) => {
     if (err) return res.status(404).json({ err, msg: 'Error getting image' });
-    if (!image) {
+    if (!image || image.length < 1) {
       return res.status(404).json({ err, msg: 'Image does not exist' });
     }
     return req.app.locals.gfs.openDownloadStream(_id).pipe(res);
@@ -35,8 +35,8 @@ exports.post_update_image = [
     const _id = new mongoose.Types.ObjectId(req.params.id);
     req.app.locals.gfs.delete(_id, (err) => {
       if (err) return res.status(500).json({ err, msg: 'Failed to remove image' });
+      return res.json({ imageId: req.file.id, msg: 'Sucessfully updated image' });
     });
-    return res.json({ imageId: req.file.id, msg: 'Sucessfully updated image' });
   },
 ];
 
@@ -45,6 +45,6 @@ exports.delete_image = (req, res, next) => {
   const _id = new mongoose.Types.ObjectId(req.params.id);
   req.app.locals.gfs.delete(_id, (err) => {
     if (err) return res.status(500).json({ err, msg: 'Failed to remove image' });
+    return res.json({ msg: 'Sucessfully deleted image' });
   });
-  return res.json({ msg: 'Sucessfully deleted image' });
 };
