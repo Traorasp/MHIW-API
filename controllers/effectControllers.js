@@ -15,7 +15,7 @@ exports.get_effect = (req, res, next) => {
     .exec((err, effect) => {
       if (err) return res.status(404).json({ err, msg: 'Failed to retrieve effect' });
       if (!effect) return res.status(404).json({ err, msg: 'Effect does not exist' });
-      return res.json(effect);
+      return res.json({ effect });
     });
 };
 
@@ -24,7 +24,7 @@ exports.get_effect_list = (req, res, next) => {
   Effect.find()
     .exec((err, effects) => {
       if (err) return res.status(404).json({ err, msg: 'Failed to retrieve effect' });
-      return res.json(effects);
+      return res.json({ effects });
     });
 };
 

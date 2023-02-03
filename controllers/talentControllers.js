@@ -8,7 +8,7 @@ exports.get_talent = (req, res, next) => {
     .exec((err, talent) => {
       if (err) return res.status(404).json({ err, msg: 'Error retrieving talent' });
       if (!talent) return res.status(404).json({ err, msg: 'Talent does not exist' });
-      return res.json(talent);
+      return res.json({ talent });
     });
 };
 
@@ -17,7 +17,7 @@ exports.get_talent_list = (req, res, next) => {
   Talent.find()
     .exec((err, talent) => {
       if (err) return res.status(404).json({ err, msg: 'Error retrieving talents' });
-      return res.json(talent);
+      return res.json({ talent });
     });
 };
 
