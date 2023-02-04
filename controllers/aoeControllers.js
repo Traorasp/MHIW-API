@@ -5,9 +5,9 @@ const Spell = require('../models/spell');
 // Returns list of all aoe
 exports.get_aoe = (req, res, next) => {
   AOE.find()
-    .exec((err, aoe) => {
+    .exec((err, aoes) => {
       if (err) return res.status(404).json({ err, msg: 'Error getting aoe list' });
-      return res.json({ aoe });
+      return res.json({ aoes });
     });
 };
 
