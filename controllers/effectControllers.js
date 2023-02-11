@@ -207,13 +207,13 @@ exports.delete_effect = (req, res, next) => {
     },
   }, (err, results) => {
     if (err) return res.status(404).json({ err, msg: 'Error retrieving results' });
-    if (Object.entries(results).every((value) => value[1] != null)) {
+    if (Object.entries(results).every((value) => value[1] == null)) {
       Effect.findByIdAndDelete(req.params.id, (err) => {
         if (err) return res.status(404).json({ err, msg: 'Failed to remove effect' });
         return res.json({ msg: 'Succesfully removed effect' });
       });
-      return res.json({});
+    } else {
+      return res.json({ results, msg: 'There are still references to effect' });
     }
-    return res.json({ results, msg: 'There are still references to effect' });
   });
 };

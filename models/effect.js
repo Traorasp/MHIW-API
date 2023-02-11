@@ -10,7 +10,7 @@ const effectSchema = new Schema({
   training: { type: String },
   stat: { type: String },
   property: { type: String },
-  effect: { type: String },
+  effect: { type: String, require: true },
   duration: { type: Number, require: true, min: 1 },
 });
 
