@@ -37,7 +37,7 @@ exports.post_material = [
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.json({
+      return res.status(404).json({
         data: req.body, errors: errors.array(),
       });
     }
@@ -52,7 +52,7 @@ exports.post_material = [
           const material = new Material({
             name: req.body.name,
             description: req.body.description,
-            image: req.file.id,
+            image: req.body.file ? req.body.file : null,
             effects: req.body.effects,
           });
           material.save((err) => {
@@ -80,7 +80,7 @@ exports.post_update_material = [
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.json({
+      return res.status(404).json({
         data: req.body, errors: errors.array(),
       });
     }
@@ -91,14 +91,14 @@ exports.post_update_material = [
     })
       .exec((err, replica) => {
         if (err) return res.status(404).json({ err, msg: 'Error retrieving replica' });
-        if (!replica) {
+        if (!replica || replica.id == req.body._id) {
           const data = {
             name: req.body.name,
             description: req.body.description,
-            image: req.body.imageId,
+            image: req.body.file ? req.body.file : req.body.image ? req.body.image : null,
             effects: req.body.effects,
           };
-          Material.findByIdAndUpdate(req.body.id, data, (err, material) => {
+          Material.findByIdAndUpdate(req.body._id, data, (err, material) => {
             if (err) return res.status(404).json({ err, msg: 'Failed to save material' });
             return res.json({ material, msg: 'Succesfully updated material' });
           });

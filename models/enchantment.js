@@ -8,6 +8,7 @@ const EnchantmentSchema = new Schema({
   },
   skill: { type: Schema.Types.ObjectId, ref: 'Skill' },
   spell: { type: Schema.Types.ObjectId, ref: 'Spell' },
+  antiTalent: { type: Schema.Types.ObjectId, ref: 'Talent' },
 });
 
 module.exports = mongoose.model('Enchantment', EnchantmentSchema);

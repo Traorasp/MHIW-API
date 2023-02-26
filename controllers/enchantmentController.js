@@ -5,24 +5,22 @@ const Item = require('../models/item');
 // Returns details of an enchantment
 exports.get_enchantment_details = (req, res, next) => {
   Enchantment.findById(req.params.id)
-    .exec((err, enchant) => {
+    .populate('skill')
+    .populate('spell')
+    .populate('antiTalent')
+    .exec((err, enchantment) => {
       if (err) return res.status(404).json({ err, msg: 'Error retrieving enchantment' });
-      if (!enchant) return res.status(404).json({ err, msg: 'Enchantment does not exists' });
-      if (enchant.skill !== '') {
-        enchant.populate('skill');
-      } else if (enchant.spell !== '') {
-        enchant.populate('spell');
-      }
-      return res.json({ enchant });
+      if (!enchantment) return res.status(404).json({ err, msg: 'Enchantment does not exists' });
+      return res.json({ enchantment });
     });
 };
 
 // Returns list of all enchantments
 exports.get_enchantment_list = (req, res, next) => {
   Enchantment.find()
-    .exec((err, enchants) => {
+    .exec((err, enchantments) => {
       if (err) return res.status(404).json({ err, msg: 'Error retrieving enchantments' });
-      return res.json({ enchants });
+      return res.json({ enchantments });
     });
 };
 
@@ -36,7 +34,7 @@ exports.post_enchantment = [
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.json({
+      return res.status(404).json({
         data: req.body,
         errors: errors.array(),
       });
@@ -44,22 +42,23 @@ exports.post_enchantment = [
 
     Enchantment.findOne({
       amount: req.body.amount,
-      skill: req.params.skill,
-      spell: req.body.spell,
+      skill: req.params.skill ? req.params.skill : null,
+      spell: req.body.spell ? req.params.spell : null,
+      antiTalent: req.body.antiTalent ? req.params.antiTalent : null,
     })
       .exec((err, replica) => {
         if (err) return res.status(404).json({ err, msg: 'Error retrieving replica enchantment' });
         if (!replica) {
-          const enchant = new Enchantment({});
+          const enchantment = new Enchantment({});
           Object.keys(req.body).forEach((key) => {
             if (req.body[key] != undefined && req.body[key] != []) {
-              enchant[key] = req.body[key];
+              enchantment[key] = req.body[key];
             }
           });
 
-          enchant.save((err) => {
+          enchantment.save((err) => {
             if (err) return res.status(404).json({ err, msg: 'Failed to save changes' });
-            return res.json({ msg: 'Sucesfully created enchantment', enchant });
+            return res.json({ msg: 'Sucesfully created enchantment', enchantment });
           });
         } else {
           return res.json({ replica, msg: 'Enchantment already exists' });
@@ -73,7 +72,7 @@ exports.delete_enchantment = (req, res, next) => {
   Item.findOne({ enchantments: req.params.id })
     .exec((err, items) => {
       if (err) return res.status(404).json({ err, msg: 'Error retrieving item' });
-      if (items.length < 1) {
+      if (!items) {
         Enchantment.findByIdAndDelete(req.params.id, (err) => {
           if (err) return res.status(404).json({ err, msg: 'Failed to save enchantment' });
           return res.json({ msg: 'Enchantment succesfully deleted' });

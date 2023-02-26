@@ -35,7 +35,7 @@ exports.post_magic = [
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.json({
+      return res.status(404).json({
         data: req.body, errors: errors.array(),
       });
     }
@@ -77,7 +77,7 @@ exports.post_update_magic = [
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.json({
+      return res.status(404).json({
         data: req.body, errors: errors.array(),
       });
     }
@@ -89,8 +89,8 @@ exports.post_update_magic = [
     })
       .exec((err, replica) => {
         if (err) return res.status(404).json({ err, msg: 'Erro retrieving replica' });
-        if (!replica) {
-          Magic.findById(req.body.id)
+        if (!replica || replica.id == req.body._id) {
+          Magic.findById(req.body._id)
             .exec((err, magic) => {
               if (err) return res.status(404).json({ err, msg: 'Error retrieving magic' });
               if (!magic) return res.status(404).json({ err, msg: 'Magic does not exists' });

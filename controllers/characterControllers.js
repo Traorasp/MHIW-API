@@ -47,7 +47,7 @@ exports.post_create_character = [
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
-      return res.json({
+      return res.status(404).json({
         data: req.body,
         errors: errors.array(),
       });
@@ -122,7 +122,7 @@ exports.post_update_character = [
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.json({ data: req.body, errors: errors.array() });
+      return res.status(404).json({ data: req.body, errors: errors.array() });
     }
     Character.findById(req.body.id)
       .exec((err, char) => {

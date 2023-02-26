@@ -187,8 +187,11 @@ router.delete('/magic/:id', verifyAdmin, magicCont.delete_magic);
 
 /// AOE ROUTES ///
 
+// GET one aoe
+router.get('/aoe/:id', aoeCont.get_aoe);
+
 // GET list of all aoe
-router.get('/aoe', aoeCont.get_aoe);
+router.get('/aoes', aoeCont.get_aoe_list);
 
 // POST a new aoe
 router.post('/aoe', verifyAdmin, aoeCont.post_aoe);

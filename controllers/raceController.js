@@ -59,7 +59,7 @@ exports.post_race = [
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.json({
+      return res.status(404).json({
         data: req.body, errors: errors.array(),
       });
     }
@@ -71,8 +71,9 @@ exports.post_race = [
         if (err) return res.status(404).json({ err, msg: 'Error retrieving replica' });
         if (!replica) {
           const race = new Race({});
+          race.name = req.body.name;
           Object.keys(req.body).forEach((key) => {
-            if (req.body[key] != undefined && req.body[key] != []) {
+            if (req.body[key] != undefined && req.body[key] != '' && req.body[key] != [] && key !== 'name') {
               race[key] = req.body[key];
             }
           });
@@ -121,7 +122,7 @@ exports.post_update_race = [
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.json({
+      return res.status(404).json({
         data: req.body, errors: errors.array(),
       });
     }
@@ -131,14 +132,15 @@ exports.post_update_race = [
     })
       .exec((err, replica) => {
         if (err) return res.status(404).json({ err, msg: 'Error retrieving replica' });
-        if (!replica || replica.id == req.body.id) {
+        if (!replica || replica.id == req.body._id) {
           const data = {};
+          data.name = req.body.name;
           Object.keys(req.body).forEach((key) => {
-            if (req.body[key] != undefined && key !== 'id') {
+            if (req.body[key] != undefined && key !== 'id' && key !== 'name') {
               data[key] = req.body[key];
             }
           });
-          Race.findByIdAndUpdate(req.body.id, data, (err, race) => {
+          Race.findByIdAndUpdate(req.body._id, data, (err, race) => {
             if (err) return res.status(404).json({ err, msg: 'Failed to sae race' });
             return res.json({ race, msg: 'Race succesfully updated' });
           });

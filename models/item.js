@@ -10,8 +10,8 @@ const ItemSchema = new Schema({
     type: Number, required: true, min: 1, max: 15,
   },
   material: { type: Schema.Types.ObjectId, ref: 'Material' },
-  subStat: [{ type: Schema.Types.ObjectId, ref: 'Effect' }],
-  cost: { type: Number, min: 1 },
+  subStats: [{ type: Schema.Types.ObjectId, ref: 'Effect' }],
+  cost: { type: Number, min: 0 },
   type: { type: String, require: true, minLength: 1 },
   baseStats: {
     maxDurability: { type: Number, min: 0 },

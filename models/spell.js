@@ -5,7 +5,7 @@ const { Schema } = mongoose;
 const SpellSchema = new Schema({
   name: { type: String, require: true, minLength: 1 },
   type: { type: String, require: true, minLength: 1 },
-  requirements: [{ type: String, minLength: 1 }],
+  requirements: { type: String, minLength: 1 },
   damageType: [{ type: String, require: true, minLength: 1 }],
   damageRatio: {
     type: Number, min: 0, max: 5,
@@ -16,9 +16,9 @@ const SpellSchema = new Schema({
   knockbackRatio: {
     type: Number, min: 0, max: 5,
   },
-  cost: { type: Number, required: true, min: 1 },
-  range: { type: Number, required: true, min: 1 },
-  aoe: [{ type: Schema.Types.ObjectId, ref: 'AOE' }],
+  cost: { type: Number, required: true, min: 0 },
+  range: { type: Number, required: true, min: 0 },
+  aoes: [{ type: Schema.Types.ObjectId, ref: 'AOE' }],
   effects: [{ type: Schema.Types.ObjectId, ref: 'Effect' }],
   description: { type: String },
   charge: { type: Number, min: 1 },

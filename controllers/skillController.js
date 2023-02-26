@@ -72,7 +72,7 @@ exports.post_skill = [
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.json({
+      return res.status(404).json({
         data: req.body, errors: errors.array(),
       });
     }
@@ -132,6 +132,7 @@ exports.post_update_skill = [
     .escape(),
   body('range', 'Skill must have a positive range')
     .trim()
+    .optional({ checkFalsy: true })
     .isInt({ min: 1 })
     .escape(),
   body('description', 'Skill must have a description')
@@ -141,21 +142,21 @@ exports.post_update_skill = [
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.json({
+      return res.status(404).json({
         data: req.body, errors: errors.array(),
       });
     }
     Skill.findOne(req.body)
       .exec((err, replica) => {
         if (err) return res.status(404).json({ err, msg: 'Error retrieving skill' });
-        if (!replica) {
+        if (!replica || replica.id == req.body._id) {
           const data = {};
           Object.keys(req.body).forEach((key) => {
             if (req.body[key] != undefined && req.body[key] != [] && key !== 'id') {
               data[key] = req.body[key];
             }
           });
-          Skill.findByIdAndUpdate(req.body.id, data, (err, skill) => {
+          Skill.findByIdAndUpdate(req.body._id, data, (err, skill) => {
             if (err) return res.status(404).json({ err, msg: 'Failed to save skill' });
             return res.json({ skill, msg: 'Succesfully updated skill' });
           });

@@ -37,8 +37,7 @@ exports.post_talent = [
     .escape(),
   body('measurements.*', 'Talent measurements cannot be empty')
     .trim()
-    .isLength({ min: 3 })
-    .withMessage('Must be atleast 3 chaacters long')
+    .isLength({ min: 0 })
     .escape(),
   body('castTime', 'Talent cast time must be a positive number')
     .trim()
@@ -58,8 +57,6 @@ exports.post_talent = [
   body('charges', 'Talent charges must be a positive number')
     .trim()
     .optional({ checkFalsy: true })
-    .isInt({ min: 2 })
-    .withMessage('Charges value must be atleast 2 or greater')
     .escape(),
   body('description', 'Talent description cannot be empty')
     .trim()
@@ -68,7 +65,7 @@ exports.post_talent = [
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.json({ data: req.body, errors });
+      return res.status(404).json({ data: req.body, errors });
     }
 
     Talent.findOne({
@@ -152,7 +149,7 @@ exports.post_update_talent = [
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.json({ data: req.body, errors });
+      return res.status(404).json({ data: req.body, errors });
     }
 
     Talent.findOne({
@@ -180,7 +177,7 @@ exports.post_update_talent = [
             charges: req.body.charges,
             description: req.body.description,
           };
-          Talent.findByIdAndUpdate(req.body.id, data, (err, talent) => {
+          Talent.findByIdAndUpdate(req.body._id, data, (err, talent) => {
             if (err) return res.status(404).json({ err, msg: 'Failed to save talent' });
             return res.json({ talent, msg: 'Succesfully updated talent' });
           });

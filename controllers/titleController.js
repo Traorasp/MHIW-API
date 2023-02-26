@@ -45,7 +45,7 @@ exports.post_title = [
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.json({
+      return res.status(404).json({
         data: req.body, errors: errors.array(),
       });
     }
@@ -92,7 +92,7 @@ exports.post_update_title = [
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.json({
+      return res.status(404).json({
         data: req.body, errors: errors.array(),
       });
     }
@@ -103,14 +103,14 @@ exports.post_update_title = [
     })
       .exec((err, replica) => {
         if (err) return res.status(404).json({ err, msg: 'Error retrieving title' });
-        if (!replica || replica.id != req.body.id) {
+        if (!replica || replica.id == req.body._id) {
           const data = {};
           Object.keys(req.body).forEach((key) => {
             if (req.body[key] != undefined && req.body[key] != []) {
               data[key] = req.body[key];
             }
           });
-          Title.findByIdAndUpdate(req.body.id, data, (err, title) => {
+          Title.findByIdAndUpdate(req.body._id, data, (err, title) => {
             if (err) return res.status(404).json({ err, msg: 'Failed to save title' });
             return res.json({ title, msg: 'Title succesfully updated' });
           });

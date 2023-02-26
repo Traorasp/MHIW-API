@@ -49,7 +49,7 @@ exports.refresh_auth_token = (req, res, next) => {
         .exec((err, user) => {
           if (err) return res.status(404).json({ err, msg: 'Error retrieving user' });
           if (!user) return res.status(404).json({ err, msg: 'User does ot exist' });
-          const token = jwt.sign({ user }, process.env.ACCESS_SECRET_KEY, { expiresIn: '15m' });
+          const token = jwt.sign({ user }, process.env.ACCESS_SECRET_KEY, { expiresIn: '60m' });
 
           res.json({ user, token });
         });

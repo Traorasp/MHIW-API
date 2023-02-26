@@ -86,7 +86,7 @@ exports.post_item = [
       });
       let max = 0;
       switch (req.body.rarity) {
-        case 'VeryCommon':
+        case 'Very Common':
           max = 1;
           break;
         case 'Common':
@@ -110,6 +110,12 @@ exports.post_item = [
         case 'Mythical':
           max = 8;
           break;
+        case 'Quasi Artifact':
+          max = 9;
+          break;
+        case 'Artifact':
+          max = 10;
+          break;
         default:
           throw new Error('Rarity does not exist');
       }
@@ -121,7 +127,7 @@ exports.post_item = [
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.json({
+      return res.status(404).json({
         data: req.body,
         errors: errors.array(),
       });
@@ -220,6 +226,12 @@ exports.post_update_item = [
         case 'Mythical':
           max = 8;
           break;
+        case 'Quasi Artifact':
+          max = 9;
+          break;
+        case 'Artifact':
+          max = 10;
+          break;
         default:
           throw new Error('Rarity does not exist');
       }
@@ -231,13 +243,13 @@ exports.post_update_item = [
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.json({
+      return res.status(404).json({
         data: req.body,
         errors: errors.array(),
       });
     }
 
-    Item.findById(req.body.id)
+    Item.findById(req.body._id)
       .exec((err, item) => {
         if (err) return res.status(404).json({ err, msg: 'Error retrieving item' });
         if (!item) return res.json({ msg: 'No such item exists' });

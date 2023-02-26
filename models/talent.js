@@ -6,11 +6,11 @@ const TalentSchema = new Schema({
   name: { type: String, require: true, minLength: 1 },
   parent: { type: String, require: true, minLength: 1 },
   priority: { type: String, require: true, minLength: 1 },
-  measurements: [{ type: String, require: true, minLength: 3 }],
-  castTime: { type: Number, min: 1 },
+  measurements: [{ type: String, require: true, minLength: 0 }],
+  castTime: { type: Number, min: 0 },
   duration: { type: Number, require: true, min: 0 },
-  cooldown: { type: Number, min: 1 },
-  charges: { type: Number, min: 2 },
+  cooldown: { type: Number, min: 0 },
+  charges: { type: Number, min: 0 },
   description: { type: String, require: true, minLength: 1 },
 });
 

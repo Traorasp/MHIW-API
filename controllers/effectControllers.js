@@ -67,7 +67,7 @@ exports.post_effect = [
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.json({ data: req.body, errors });
+      return res.status(404).json({ data: req.body, errors });
     }
 
     Effect.findOne({
@@ -139,12 +139,13 @@ exports.post_update_effect = [
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.json({ data: req.body, errors });
+      return res.status(404).json({ data: req.body, errors });
     }
 
     Effect.findOne({
       name: req.body.name,
       damageType: req.body.damageType,
+      show: req.body.show,
       damage: req.body.damage,
       training: req.body.training,
       stat: req.body.stat,
@@ -156,7 +157,9 @@ exports.post_update_effect = [
         if (err) return res.status(404).json({ err, msg: 'Error retrieving replica' });
         if (!replica) {
           const data = {
+            _id: req.body._id,
             name: req.body.name,
+            show: req.body.show,
             damageType: req.body.damageType,
             damage: req.body.damage,
             training: req.body.training,
@@ -165,7 +168,7 @@ exports.post_update_effect = [
             effect: req.body.effect,
             duration: req.body.duration,
           };
-          Effect.findByIdAndUpdate(req.body.id, data, (err, effect) => {
+          Effect.findByIdAndUpdate(req.body._id, data, (err, effect) => {
             if (err) return res.status(404).json({ err, msg: 'Failed to save effect' });
             return res.json({ effect, msg: 'Succesfully updated effect' });
           });

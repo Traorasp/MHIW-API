@@ -41,10 +41,11 @@ exports.post_spell = [
     .escape(),
   body('requirements', 'Spell must have requirements.')
     .trim()
-    .isLength({ min: 1 })
+    .optional({ checkFalsy: true })
     .escape(),
-  body('damageType', 'Spell must have a damage type.')
+  body('damageType*', 'Spell must have a damage type.')
     .trim()
+    .optional({ checkFalsy: true })
     .isLength({ min: 1 })
     .escape(),
   body('damageRatio', 'Spell must have a damage ratio between 0 and 5')
@@ -68,7 +69,7 @@ exports.post_spell = [
     .escape(),
   body('range', 'Spell must have a positive range')
     .trim()
-    .isInt({ min: 1 })
+    .isInt({ min: 0 })
     .escape(),
   body('charge', 'Spell with a charge cannot have a charge of less than one')
     .trim()
@@ -82,7 +83,7 @@ exports.post_spell = [
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.json({
+      return res.status(404).json({
         data: req.body, errors: errors.array(),
       });
     }
@@ -102,8 +103,9 @@ exports.post_spell = [
         if (err) return res.status(404).json({ err, msg: 'Error retrieving replica' });
         if (!replica) {
           const spell = new Spell({});
+          spell.name = req.body.name;
           Object.keys(req.body).forEach((key) => {
-            if (req.body[key] != undefined && req.body[key] != []) {
+            if (req.body[key] != undefined && req.body[key] != [] && key != 'name') {
               spell[key] = req.body[key];
             }
           });
@@ -130,10 +132,11 @@ exports.post_update_spell = [
     .escape(),
   body('requirements', 'Spell must have requirements.')
     .trim()
-    .isLength({ min: 1 })
+    .optional({ checkFalsy: true })
     .escape(),
-  body('damageType', 'Spell must have a damage type.')
+  body('damageType*', 'Spell must have a damage type.')
     .trim()
+    .optional({ checkFalsy: true })
     .isLength({ min: 1 })
     .escape(),
   body('damageRatio', 'Spell must have a damage ratio between 0 and 5')
@@ -171,7 +174,7 @@ exports.post_update_spell = [
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.json({
+      return res.status(404).json({
         data: req.body, errors: errors.array(),
       });
     }
@@ -190,13 +193,14 @@ exports.post_update_spell = [
     })
       .exec((err, replica) => {
         if (err) return res.status(404).json({ err, msg: 'Error retrieving replica' });
-        if (!replica) {
-          Spell.findById(req.body.id)
+        if (!replica || replica._id == req.body._id) {
+          Spell.findById(req.body._id)
             .exec((err, spell) => {
               if (err) return res.status(404).json({ err, msg: 'Error retrieving spell' });
               if (!spell) return res.status(404).json({ msg: 'Spell does not exist' });
+              spell.name = req.body.name;
               Object.keys(req.body).forEach((key) => {
-                if (req.body[key] != undefined && req.body[key] != []) {
+                if (req.body[key] != undefined && req.body[key] != [] && key !== 'name') {
                   spell[key] = req.body[key];
                 }
               });
@@ -217,14 +221,20 @@ exports.delete_spell = (req, res, next) => {
   Magic.findOne({ spells: req.params.id })
     .exec((err, magic) => {
       if (err) return res.status(404).json({ err, msg: 'Failed to retrieve magic' });
-      if (!magic) return res.status(404).json({ err, msg: 'Magic does not exist' });
-      magic.spells.splice(magic.spells.indexOf(req.params.id), 1);
-      magic.save(() => {
-        if (err) return res.status(404).json({ err, msg: 'Failed to save magic' });
+      if (!magic) {
         Spell.findByIdAndDelete(req.params.id, (err) => {
           if (err) return res.status(404).json({ msg: 'Failed to remove magic' });
           return res.json({ msg: 'Succesfully deletd magic' });
         });
-      });
+      } else {
+        magic.spells.splice(magic.spells.indexOf(req.params.id), 1);
+        magic.save(() => {
+          if (err) return res.status(404).json({ err, msg: 'Failed to save magic' });
+          Spell.findByIdAndDelete(req.params.id, (err) => {
+            if (err) return res.status(404).json({ msg: 'Failed to remove magic' });
+            return res.json({ msg: 'Succesfully deletd magic' });
+          });
+        });
+      }
     });
 };

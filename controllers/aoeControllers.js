@@ -2,8 +2,18 @@ const { body, validationResult } = require('express-validator');
 const AOE = require('../models/aoe');
 const Spell = require('../models/spell');
 
-// Returns list of all aoe
+// Returns specific aoe
 exports.get_aoe = (req, res, next) => {
+  AOE.findById(req.params.id)
+    .exec((err, aoe) => {
+      if (err) return res.status(404).json({ err, msg: 'Error getting aoe' });
+      if (!aoe) return res.status(404).json({ err, msg: 'No such aoe exists' });
+      return res.json({ aoe });
+    });
+};
+
+// Returns list of all aoe
+exports.get_aoe_list = (req, res, next) => {
   AOE.find()
     .exec((err, aoes) => {
       if (err) return res.status(404).json({ err, msg: 'Error getting aoe list' });
@@ -27,7 +37,7 @@ exports.post_aoe = [
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.json({ data: req.body, errors });
+      return res.status(404).json({ data: req.body, errors });
     }
 
     AOE.findOne({
@@ -68,7 +78,7 @@ exports.post_update_aoe = [
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.json({ data: req.body, errors });
+      return res.status(404).json({ data: req.body, errors });
     }
 
     AOE.findOne({
@@ -80,12 +90,12 @@ exports.post_update_aoe = [
         if (err) return res.status(404).json({ err, msg: 'Error retrieving aoe replica' });
         if (!replica) {
           const data = {
-            _id: req.body.id,
+            _id: req.body._id,
             name: req.body.name,
             fixed: req.body.fixed,
             range: req.body.range,
           };
-          AOE.findByIdAndUpdate(req.body.id, data, (err, aoe) => {
+          AOE.findByIdAndUpdate(req.body._id, data, (err, aoe) => {
             if (err) return res.status(404).json({ err, msg: 'Failed to save aoe' });
             return res.json({ aoe, msg: 'Succesfully updated AOE' });
           });

@@ -16,7 +16,7 @@ const RaceSchema = new Schema({
     mana: { type: Number, require: true, min: 0 },
     accuracy: { type: Number, require: true, min: 0 },
     evasion: { type: Number, require: true, min: 0 },
-    charisma: { type: Number, min: 0 },
+    charisma: { type: Number, require: true, min: 0 },
     will: { type: Number, require: true, min: 0 },
     intimidation: { type: Number, require: true, min: 0 },
     hiding: { type: Number, require: true, min: 0 },

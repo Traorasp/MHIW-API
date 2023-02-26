@@ -8,8 +8,8 @@ const TitleSchema = new Schema({
     type: Number, require: true, min: 1, max: 15,
   },
   description: { type: String, require: true, minLength: 1 },
-  effects: { type: Schema.Types.ObjectId, ref: 'Effect' },
-  skills: { type: Schema.Types.ObjectId, ref: 'Skill' },
+  effects: [{ type: Schema.Types.ObjectId, ref: 'Effect' }],
+  skills: [{ type: Schema.Types.ObjectId, ref: 'Skill' }],
 });
 
 module.exports = mongoose.model('Title', TitleSchema);
