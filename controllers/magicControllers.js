@@ -5,7 +5,6 @@ const Spell = require('../models/spell');
 // Returns details of a cerrtain magic
 exports.get_magic_details = (req, res, next) => {
   Magic.findById(req.params.id)
-    .populate('spells')
     .exec((err, magic) => {
       if (err) return res.status(404).json({ err, msg: 'Error retrieving magic' });
       if (!magic) return res.status(404).json({ err, msg: 'Magic does not exists' });
@@ -85,7 +84,6 @@ exports.post_update_magic = [
     Magic.findOne({
       name: req.body.name,
       description: req.body.description,
-      spells: req.body.spells,
     })
       .exec((err, replica) => {
         if (err) return res.status(404).json({ err, msg: 'Erro retrieving replica' });

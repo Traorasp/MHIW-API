@@ -19,6 +19,7 @@ const talentCont = require('../controllers/talentControllers');
 const skillCont = require('../controllers/skillController');
 const raceCont = require('../controllers/raceController');
 const titleCont = require('../controllers/titleController');
+const classCont = require('../controllers/classesController');
 
 /// IMAGE Routes ///
 
@@ -75,7 +76,7 @@ router.delete('/friend/request/remove/:id', userCont.delete_friend_request);
 router.get('/character/:id', charCont.get_character);
 
 // GET basic info of all of users characters
-router.get('/characters', charCont.get_character_list);
+router.get('/characters/:id', charCont.get_character_list);
 
 // POST to create a new character
 router.post('/character', charCont.post_create_character);
@@ -269,5 +270,20 @@ router.post('/title/update', verifyAdmin, titleCont.post_update_title);
 
 // Delete a specific title
 router.delete('/title/:id', verifyAdmin, titleCont.delete_title);
+
+// GET details of a class
+router.get('/class/:id', classCont.get_class_details);
+
+// GET list of all class
+router.get('/classs', classCont.get_class_list);
+
+// POST a new class
+router.post('/class', verifyAdmin, classCont.post_class);
+
+// POST update to a class
+router.post('/class/update', verifyAdmin, classCont.post_update_class);
+
+// Delete a specific class
+router.delete('/class/:id', verifyAdmin, classCont.delete_class);
 
 module.exports = router;

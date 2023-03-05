@@ -43,6 +43,11 @@ exports.post_spell = [
     .trim()
     .optional({ checkFalsy: true })
     .escape(),
+  body('magics*', 'Spell must belong to a magic.')
+    .trim()
+    .optional({ checkFalsy: true })
+    .isLength({ min: 1 })
+    .escape(),
   body('damageType*', 'Spell must have a damage type.')
     .trim()
     .optional({ checkFalsy: true })
@@ -89,6 +94,7 @@ exports.post_spell = [
     }
     Spell.findOne({
       name: req.body.name,
+      magics: req.body.magics,
       requirements: req.body.requirements,
       damageType: req.body.damageType,
       damageRatio: req.body.damageRatio,
@@ -133,6 +139,10 @@ exports.post_update_spell = [
   body('requirements', 'Spell must have requirements.')
     .trim()
     .optional({ checkFalsy: true })
+    .escape(),
+  body('magics*', 'Spell must belong to a magic.')
+    .trim()
+    .isLength({ min: 1 })
     .escape(),
   body('damageType*', 'Spell must have a damage type.')
     .trim()
@@ -181,6 +191,7 @@ exports.post_update_spell = [
 
     Spell.findOne({
       name: req.body.name,
+      magics: req.body.magic,
       requirements: req.body.requirements,
       damageType: req.body.damageType,
       damageRatio: req.body.damageRatio,

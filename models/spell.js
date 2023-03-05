@@ -5,6 +5,7 @@ const { Schema } = mongoose;
 const SpellSchema = new Schema({
   name: { type: String, require: true, minLength: 1 },
   type: { type: String, require: true, minLength: 1 },
+  magics: [{ type: Schema.Types.ObjectId, ref: 'Magic' }],
   requirements: { type: String, minLength: 1 },
   damageType: [{ type: String, require: true, minLength: 1 }],
   damageRatio: {

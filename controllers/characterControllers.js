@@ -16,13 +16,13 @@ exports.get_character = (req, res, next) => {
           promises.push(char.populate(key));
         }
       });
-      return Promise.all(promises).then(() => res.json({ char }));
+      return Promise.all(promises).then(() => res.json(char));
     });
 };
 
 // Get basic info of all users characters
 exports.get_character_list = (req, res, next) => {
-  Character.find({ owner: req.body.id })
+  Character.find({ owner: req.params.id })
     .exec((err, characters) => {
       if (err) return res.status(404).json({ err, msg: 'Error retrieving characters' });
       return res.json(characters);
@@ -43,6 +43,15 @@ exports.post_create_character = [
     .isInt({ min: 1, max: 15 })
     .withMessage('Level must be an integer between 1 and 15')
     .escape(),
+  body('age', 'Characters age must be a positive number')
+    .trim()
+    .optional({ checkFalsy: true })
+    .isInt({ min: 0 })
+    .escape(),
+  body('gender', '')
+    .trim()
+    .optional({ checkFalsy: true })
+    .escape(),
   (req, res, next) => {
     const errors = validationResult(req);
 
@@ -53,10 +62,42 @@ exports.post_create_character = [
       });
     }
     const char = new Character({
-      owner: req.id,
+      owner: req.body.owner,
       firstName: req.body.firstName,
       lastName: req.body.lastName,
       level: req.body.level,
+      age: req.body.age,
+      gender: req.body.gender,
+      raceSkills: '',
+      title: [],
+      magics: [],
+      spells: [],
+      talents: [],
+      talentTypes: [],
+      unique: [],
+      baseStats: {
+        maxHealth: 0,
+        currHealth: 0,
+        maxDefense: 0,
+        defense: 0,
+        strength: 0,
+        speed: 0,
+        mana: 0,
+        accuracy: 0,
+        evasion: 0,
+        charisma: 0,
+        will: 0,
+        intimidation: 0,
+        hiding: 0,
+        tracking: 0,
+      },
+      status: [],
+      skills: [],
+      traits: [],
+      class: [],
+      inventory: [],
+      description: '',
+      background: '',
     });
     char.save((err) => {
       if (err) return res.status(404).json({ err, msg: 'Failed to save character' });
@@ -124,11 +165,11 @@ exports.post_update_character = [
     if (!errors.isEmpty()) {
       return res.status(404).json({ data: req.body, errors: errors.array() });
     }
-    Character.findById(req.body.id)
+    Character.findById(req.body._id)
       .exec((err, char) => {
         if (err) return res.status(404).json({ err, msg: 'Error retrieving character' });
         if (!char) return res.status(404).json({ err, msg: 'Character does not exist' });
-        if (char.owner != req.id) return res.status(403).json({ err, msg: 'User does not own this character' });
+        if (char.owner != req.body.owner) return res.status(403).json({ err, msg: 'User does not own this character' });
         Object.keys(req.body).forEach((key) => {
           if (req.body[key] != undefined && req.body[key] != []) {
             char[key] = req.body[key];
