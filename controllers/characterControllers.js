@@ -10,9 +10,9 @@ exports.get_character = (req, res, next) => {
       if (!char) return res.status(404).json({ err, msg: 'Character does not exist' });
       const promises = [];
       Object.entries(char._doc).forEach(([key, value]) => {
-        if (Array.isArray(value) && value.length > 0) {
+        if ((Array.isArray(value) && value.length > 0)) {
           promises.push(char.populate(key));
-        } else if (value === 'race' && key !== '') {
+        } else if (key === 'race' && key !== '') {
           promises.push(char.populate(key));
         }
       });
@@ -76,17 +76,18 @@ exports.post_create_character = [
       talentTypes: [],
       unique: [],
       baseStats: {
-        maxHealth: 0,
         currHealth: 0,
-        maxDefense: 0,
+        maxHealth: 0,
         defense: 0,
+        maxDefense: 0,
         strength: 0,
         speed: 0,
         mana: 0,
+        maxMana: 0,
+        will: 0,
         accuracy: 0,
         evasion: 0,
         charisma: 0,
-        will: 0,
         intimidation: 0,
         hiding: 0,
         tracking: 0,
@@ -96,6 +97,7 @@ exports.post_create_character = [
       traits: [],
       class: [],
       inventory: [],
+      equiped: [],
       description: '',
       background: '',
     });
@@ -156,6 +158,15 @@ exports.post_update_character = [
     .escape(),
   body('baseStats.*', '')
     .trim()
+    .custom((baseStats, { req }) => {
+      const totalLV = 0;
+
+      if (totalLV > req.body.level) {
+        throw new Error('Race skill level cannot be higher than level');
+      } else {
+        return true;
+      }
+    })
     .optional({ checkFalsy: true })
     .isInt({ min: 0 })
     .withMessage('Base stat must be a positive number')
@@ -170,15 +181,15 @@ exports.post_update_character = [
         if (err) return res.status(404).json({ err, msg: 'Error retrieving character' });
         if (!char) return res.status(404).json({ err, msg: 'Character does not exist' });
         if (char.owner != req.body.owner) return res.status(403).json({ err, msg: 'User does not own this character' });
+        const data = {};
         Object.keys(req.body).forEach((key) => {
-          if (req.body[key] != undefined && req.body[key] != []) {
-            char[key] = req.body[key];
+          if (req.body[key] != undefined) {
+            data[key] = req.body[key];
           }
         });
-
-        char.save((err) => {
-          if (err) return res.status(404).json({ err, msg: 'Failed to save changes' });
-          return res.json({ msg: 'Sucesfully updated character', char });
+        Character.findByIdAndUpdate(req.body._id, data, (err, char) => {
+          if (err) return res.status(404).json({ err, msg: 'Failed to save character' });
+          return res.json({ char, msg: 'Character succesfully updated' });
         });
       });
   },

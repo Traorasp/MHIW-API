@@ -18,12 +18,12 @@ exports.get_class_details = (req, res, next) => {
     });
 };
 
-// Returns list of all classess
+// Returns list of all classes
 exports.get_class_list = (req, res, next) => {
   Classes.find()
-    .exec((err, classess) => {
+    .exec((err, classes) => {
       if (err) return res.status(404).json({ err, msg: 'Error retrieving class' });
-      return res.json({ classess });
+      return res.json({ classes });
     });
 };
 
