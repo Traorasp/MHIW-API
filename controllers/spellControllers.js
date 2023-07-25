@@ -1,6 +1,9 @@
 const { body, validationResult } = require('express-validator');
+const async = require('async');
 const Spell = require('../models/spell');
-const Magic = require('../models/magic');
+const Enchantment = require('../models/enchantment');
+const { handleDeletion } = require('./handleDeletion');
+const Character = require('../models/character');
 
 // Returns details of a cerrtain spell
 exports.get_spell_details = (req, res, next) => {
@@ -42,11 +45,6 @@ exports.post_spell = [
   body('requirements', 'Spell must have requirements.')
     .trim()
     .optional({ checkFalsy: true })
-    .escape(),
-  body('magics*', 'Spell must belong to a magic.')
-    .trim()
-    .optional({ checkFalsy: true })
-    .isLength({ min: 1 })
     .escape(),
   body('damageType*', 'Spell must have a damage type.')
     .trim()
@@ -140,10 +138,6 @@ exports.post_update_spell = [
     .trim()
     .optional({ checkFalsy: true })
     .escape(),
-  body('magics*', 'Spell must belong to a magic.')
-    .trim()
-    .isLength({ min: 1 })
-    .escape(),
   body('damageType*', 'Spell must have a damage type.')
     .trim()
     .optional({ checkFalsy: true })
@@ -229,23 +223,21 @@ exports.post_update_spell = [
 
 // Deletes a certain spell
 exports.delete_spell = (req, res, next) => {
-  Magic.findOne({ spells: req.params.id })
-    .exec((err, magic) => {
-      if (err) return res.status(404).json({ err, msg: 'Failed to retrieve magic' });
-      if (!magic) {
-        Spell.findByIdAndDelete(req.params.id, (err) => {
-          if (err) return res.status(404).json({ msg: 'Failed to remove magic' });
-          return res.json({ msg: 'Succesfully deletd magic' });
-        });
-      } else {
-        magic.spells.splice(magic.spells.indexOf(req.params.id), 1);
-        magic.save(() => {
-          if (err) return res.status(404).json({ err, msg: 'Failed to save magic' });
-          Spell.findByIdAndDelete(req.params.id, (err) => {
-            if (err) return res.status(404).json({ msg: 'Failed to remove magic' });
-            return res.json({ msg: 'Succesfully deletd magic' });
-          });
-        });
-      }
-    });
+  async.parallel({
+    character(callback) {
+      Character.find({ spells: req.params.id })
+        .exec(callback);
+    },
+    enchant(callback) {
+      Enchantment.find({ spell: req.params.id })
+        .exec(callback);
+    },
+    spell(callback) {
+      Spell.find({ followUp: req.params.id })
+        .exec(callback);
+    },
+  }, (err, results) => {
+    if (err) return res.status(404).json({ err, msg: 'Error retrieving results' });
+    return handleDeletion(results, 'Spell', res, req.params.id);
+  });
 };

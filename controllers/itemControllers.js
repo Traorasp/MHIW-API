@@ -1,6 +1,8 @@
 const { body, validationResult } = require('express-validator');
 const Item = require('../models/item');
 const Enchantment = require('../models/enchantment');
+const Character = require('../models/character');
+const { handleDeletion } = require('./handleDeletion');
 
 // Returns detail of a specific item
 // Uses promises since populate requires a promise
@@ -268,13 +270,13 @@ exports.post_update_item = [
 
 // Deletes a specified item
 exports.delete_item = (req, res, next) => {
-  Item.findById(req.params.id)
-    .exec((err, item) => {
-      if (err) return res.status(404).json({ err, msg: 'Error retrieving item' });
-      if (!item) return res.status(404).json({ err, msg: 'Item does not exist' });
-      item.remove((err) => {
-        if (err) return res.status(404).json({ msg: 'Failed to remove item' });
-        return res.json({ msg: 'Sucesfully removed item' });
-      });
-    });
+  Character.find({
+    $or: [
+      { inventory: req.params.id },
+      { equiped: req.params.id },
+    ],
+  }).exec((err, results) => {
+    if (err) return res.status(404).json({ err, msg: 'Error retrieving item' });
+    handleDeletion({ character: results }, 'Item', res, req.params.id);
+  });
 };

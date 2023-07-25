@@ -1,6 +1,7 @@
 const { body, validationResult } = require('express-validator');
 const Classes = require('../models/classes');
 const Character = require('../models/character');
+const { handleDeletion } = require('./handleDeletion');
 
 // Returns details of a cerrtain classes
 exports.get_class_details = (req, res, next) => {
@@ -130,16 +131,9 @@ exports.post_update_class = [
 ];
 // Deletes a certain classes
 exports.delete_class = (req, res, next) => {
-  Character.findOne({ class: req.params.id })
-    .exec((err, char) => {
+  Character.find({ class: req.params.id })
+    .exec((err, results) => {
       if (err) return res.status(404).json({ err, msg: 'Error retrieving class' });
-      if (!char) {
-        Classes.findByIdAndDelete(req.params.id, (err) => {
-          if (err) return res.status(404).json({ err, msg: 'Failed to remove class' });
-          return res.json({ msg: 'Succesfully removed class' });
-        });
-      } else {
-        return res.json({ msg: 'There are still characters with the class' });
-      }
+      handleDeletion({ character: results }, 'Class', res, req.params.id);
     });
 };

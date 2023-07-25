@@ -1,6 +1,7 @@
 const { body, validationResult } = require('express-validator');
 const Title = require('../models/title');
 const Character = require('../models/character');
+const { handleDeletion } = require('./handleDeletion');
 
 // Returns details of a cerrtain title
 exports.get_title_details = (req, res, next) => {
@@ -122,16 +123,9 @@ exports.post_update_title = [
 ];
 // Deletes a certain title
 exports.delete_title = (req, res, next) => {
-  Character.findOne({ titles: req.params.id })
-    .exec((err, char) => {
+  Character.find({ titles: req.params.id })
+    .exec((err, results) => {
       if (err) return res.status(404).json({ err, msg: 'Error retrieving title' });
-      if (!char) {
-        Title.findByIdAndDelete(req.params.id, (err) => {
-          if (err) return res.status(404).json({ err, msg: 'Failed to remove title' });
-          return res.json({ msg: 'Succesfully removed title' });
-        });
-      } else {
-        return res.json({ msg: 'There are still characters with the title' });
-      }
+      return handleDeletion({ character: results }, 'Title', res, req.params.id);
     });
 };

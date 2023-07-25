@@ -1,6 +1,9 @@
 const { body, validationResult } = require('express-validator');
+const async = require('async');
 const Magic = require('../models/magic');
+const Character = require('../models/character');
 const Spell = require('../models/spell');
+const { handleDeletion } = require('./handleDeletion');
 
 // Returns details of a cerrtain magic
 exports.get_magic_details = (req, res, next) => {
@@ -112,15 +115,17 @@ exports.post_update_magic = [
 
 // Deletes a certain spell
 exports.delete_magic = (req, res, next) => {
-  Magic.findById(req.params.id)
-    .exec((err, magic) => {
-      if (err) return res.status(404).json({ err, msg: 'Error retrieving magic' });
-      if (!magic) return res.status(404).json({ err, msg: 'Magic does not exist' });
-      if (magic.spells.length < 1) {
-        Magic.findByIdAndDelete(req.params.id, (err) => {
-          if (err) return res.status(404).json({ err, msg: 'Failed to delete magic' });
-          return res.json({ msg: 'Succesfully deletd magic' });
-        });
-      } else { return res.json({ msg: 'Magic still contains spells' }); }
-    });
+  async.parallel({
+    spell(callback) {
+      Spell.find({ magics: req.params.id })
+        .exec(callback);
+    },
+    character(callback) {
+      Character.find({ magics: req.params.id })
+        .exec(callback);
+    },
+  }, (err, results) => {
+    if (err) return res.status(404).json({ err, msg: 'Error retrieving results' });
+    return handleDeletion(results, 'Magic', res, req.params.id);
+  });
 };
