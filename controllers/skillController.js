@@ -1,6 +1,12 @@
 const { body, validationResult } = require('express-validator');
+const async = require('async');
 const Skill = require('../models/skill');
 const Character = require('../models/character');
+const Title = require('../models/title');
+const Classes = require('../models/classes');
+const Race = require('../models/race');
+const Enchantment = require('../models/enchantment');
+const { handleDeletion } = require('./handleDeletion');
 
 // Returns details of a cerrtain skill
 exports.get_skill_details = (req, res, next) => {
@@ -169,16 +175,40 @@ exports.post_update_skill = [
 
 // Deletes a certain skill
 exports.delete_skill = (req, res, next) => {
-  Character.findOne({ skills: req.params.id })
-    .exec((err, char) => {
-      if (err) return res.status(404).json({ err, msg: 'Error retrieving character' });
-      if (!char) {
-        Skill.findByIdAndDelete(req.params.id, (err) => {
-          if (err) return res.status(404).json({ err, msg: 'Failed to remove skill' });
-          return res.json({ msg: 'Succesfully removed skill' });
-        });
-      } else {
-        return res.json({ msg: 'Characters still reference skill' });
-      }
-    });
+  async.parallel({
+    character(callback) {
+      Character.find({
+        $or: [
+          { skills: req.params.id },
+          { traits: req.params.id },
+          { unique: req.params.id },
+        ],
+      })
+        .exec(callback);
+    },
+    classes(callback) {
+      Classes.find({ skills: req.params.id })
+        .exec(callback);
+    },
+    enchant(callback) {
+      Enchantment.find({ skill: req.params.id })
+        .exec(callback);
+    },
+    race(callback) {
+      Race.find({
+        $or: [
+          { mainSkills: req.params.id },
+          { subSkills: req.params.id },
+        ],
+      })
+        .exec(callback);
+    },
+    title(callback) {
+      Title.find({ skills: req.params.id })
+        .exec(callback);
+    },
+  }, (err, results) => {
+    if (err) return res.status(404).json({ err, msg: 'Error retrieving results' });
+    return handleDeletion(results, 'Skill', res, req.params.id);
+  });
 };

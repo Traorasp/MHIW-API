@@ -1,6 +1,9 @@
 const { body, validationResult } = require('express-validator');
+const async = require('async');
 const AOE = require('../models/aoe');
 const Spell = require('../models/spell');
+const Skill = require('../models/skill');
+const { handleDeletion } = require('./handleDeletion');
 
 // Returns specific aoe
 exports.get_aoe = (req, res, next) => {
@@ -106,16 +109,17 @@ exports.post_update_aoe = [
 
 // Deletes a spell from its magic and then itself
 exports.delete_aoe = (req, res, next) => {
-  Spell.findOne({ aoe: req.params.id })
-    .exec((err, spell) => {
-      if (err) return res.status(404).json({ err, msg: 'Error retrieving spells' });
-      if (!spell) {
-        AOE.findByIdAndDelete(req.params.id, (err) => {
-          if (err) return res.status(404).json({ err, msg: 'Error deleting aoe' });
-          return res.json({ msg: 'Succesfully removed aoe' });
-        });
-      } else {
-        return res.json({ spell, msg: 'There are still spells with aoe' });
-      }
-    });
+  async.parallel({
+    spell(callback) {
+      Spell.find({ aoes: req.params.id })
+        .exec(callback);
+    },
+    skill(callback) {
+      Skill.find({ aoes: req.params.id })
+        .exec(callback);
+    },
+  }, (err, results) => {
+    if (err) return res.status(404).json({ err, msg: 'Error retrieving results' });
+    return handleDeletion(results, 'AOE', res, req.params.id);
+  });
 };

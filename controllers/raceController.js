@@ -1,6 +1,7 @@
 const { body, validationResult } = require('express-validator');
 const Race = require('../models/race');
 const Character = require('../models/character');
+const { handleDeletion } = require('./handleDeletion');
 
 // Returns details of a cerrtain race
 exports.get_race_details = (req, res, next) => {
@@ -153,16 +154,9 @@ exports.post_update_race = [
 
 // Deletes a certain race
 exports.delete_race = (req, res, next) => {
-  Character.findOne({ race: req.params.id })
-    .exec((err, char) => {
+  Character.find({ race: req.params.id })
+    .exec((err, results) => {
       if (err) return res.status(404).json({ err, msg: 'Error retrieving character' });
-      if (!char) {
-        Race.findByIdAndDelete(req.params.id, (err) => {
-          if (err) return res.status(404).json({ err, msg: 'Failed to remove race' });
-          return res.json({ msg: 'Succesfully removed race' });
-        });
-      } else {
-        return res.json({ char, msg: 'Characters still reference race' });
-      }
+      return handleDeletion({ character: results }, 'Race', res, req.params.id);
     });
 };

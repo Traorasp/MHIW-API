@@ -1,6 +1,7 @@
 const { body, validationResult } = require('express-validator');
 const Material = require('../models/material');
 const Item = require('../models/item');
+const { handleDeletion } = require('./handleDeletion');
 
 // Returns detailed info of a material
 exports.get_material_details = (req, res, next) => {
@@ -111,16 +112,9 @@ exports.post_update_material = [
 
 // deletes material if there are no references to it
 exports.delete_material = (req, res, next) => {
-  Item.findOne({ material: req.param.id })
-    .exec((err, item) => {
+  Item.find({ material: req.params.id })
+    .exec((err, results) => {
       if (err) return res.status(404).json({ err, msg: 'Error retrieving item' });
-      if (!item) {
-        Material.findByIdAndDelete(req.params.id, (err) => {
-          if (err) return res.status(404).json({ err, msg: 'Failed to remove material' });
-          return res.json({ msg: 'Succesfully removed material' });
-        });
-      } else {
-        return res.json({ item, msg: 'Items still reference material' });
-      }
+      return handleDeletion({ item: results }, 'Material', res, req.params.id);
     });
 };

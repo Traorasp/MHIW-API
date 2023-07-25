@@ -68,7 +68,7 @@ exports.post_create_character = [
       level: req.body.level,
       age: req.body.age,
       gender: req.body.gender,
-      raceSkills: '',
+      raceSkills: [0, 0, 0, 0, 0, 0, 0, 0],
       title: [],
       magics: [],
       spells: [],

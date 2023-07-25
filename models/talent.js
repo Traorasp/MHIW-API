@@ -4,7 +4,8 @@ const { Schema } = mongoose;
 
 const TalentSchema = new Schema({
   name: { type: String, require: true, minLength: 1 },
-  parent: { type: String, require: true, minLength: 1 },
+  talent: { type: String, require: true, minLength: 1 },
+  parent: [{ type: Schema.Types.ObjectId, ref: 'Talent' }],
   priority: { type: String, require: true, minLength: 1 },
   measurements: [{ type: String, require: true, minLength: 0 }],
   castTime: { type: Number, min: 0 },

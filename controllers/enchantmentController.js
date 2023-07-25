@@ -1,6 +1,7 @@
 const { body, validationResult } = require('express-validator');
 const Enchantment = require('../models/enchantment');
 const Item = require('../models/item');
+const { handleDeletion } = require('./handleDeletion');
 
 // Returns details of an enchantment
 exports.get_enchantment_details = (req, res, next) => {
@@ -69,16 +70,9 @@ exports.post_enchantment = [
 
 // Deletes a specified enchantment if no references point to it
 exports.delete_enchantment = (req, res, next) => {
-  Item.findOne({ enchantments: req.params.id })
-    .exec((err, items) => {
+  Item.find({ enchantments: req.params.id })
+    .exec((err, results) => {
       if (err) return res.status(404).json({ err, msg: 'Error retrieving item' });
-      if (!items) {
-        Enchantment.findByIdAndDelete(req.params.id, (err) => {
-          if (err) return res.status(404).json({ err, msg: 'Failed to save enchantment' });
-          return res.json({ msg: 'Enchantment succesfully deleted' });
-        });
-      } else {
-        return res.json({ items, msg: 'Items still reference enchantment' });
-      }
+      handleDeletion({ item: results }, 'Enchant', res, req.params.id);
     });
 };

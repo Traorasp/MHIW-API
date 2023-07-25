@@ -8,6 +8,8 @@ const Race = require('../models/race');
 const Skill = require('../models/skill');
 const Spell = require('../models/spell');
 const Title = require('../models/title');
+const Classes = require('../models/classes');
+const { handleDeletion } = require('./handleDeletion');
 
 // Returns informatin of a specific effect
 exports.get_effect = (req, res, next) => {
@@ -181,42 +183,39 @@ exports.post_update_effect = [
 exports.delete_effect = (req, res, next) => {
   async.parallel({
     character(callback) {
-      Character.findOne({ status: req.params.id })
+      Character.find({ status: req.params.id })
         .exec(callback);
     },
     item(callback) {
-      Item.findOne({ effects: req.params.id })
+      Item.find({ subStats: req.params.id })
         .exec(callback);
     },
     material(callback) {
-      Material.findOne({ effects: req.params.id })
+      Material.find({ effects: req.params.id })
         .exec(callback);
     },
     race(callback) {
-      Race.findOne({ training: req.params.id })
+      Race.find({ training: req.params.id })
         .exec(callback);
     },
     skill(callback) {
-      Skill.findOne({ effects: req.params.id })
+      Skill.find({ effects: req.params.id })
         .exec(callback);
     },
     spell(callback) {
-      Spell.findOne({ effects: req.params.id })
+      Spell.find({ effects: req.params.id })
         .exec(callback);
     },
     title(callback) {
-      Title.findOne({ effects: req.params.id })
+      Title.find({ effects: req.params.id })
+        .exec(callback);
+    },
+    classes(callback) {
+      Classes.find({ effects: req.params.id })
         .exec(callback);
     },
   }, (err, results) => {
     if (err) return res.status(404).json({ err, msg: 'Error retrieving results' });
-    if (Object.entries(results).every((value) => value[1] == null)) {
-      Effect.findByIdAndDelete(req.params.id, (err) => {
-        if (err) return res.status(404).json({ err, msg: 'Failed to remove effect' });
-        return res.json({ msg: 'Succesfully removed effect' });
-      });
-    } else {
-      return res.json({ results, msg: 'There are still references to effect' });
-    }
+    return handleDeletion(results, 'Effect', res, req.params.id);
   });
 };

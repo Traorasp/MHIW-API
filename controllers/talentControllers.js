@@ -1,6 +1,9 @@
 const { body, validationResult } = require('express-validator');
+const async = require('async');
 const Talent = require('../models/talent');
 const Character = require('../models/character');
+const Enchantment = require('../models/enchantment');
+const { handleDeletion } = require('./handleDeletion');
 
 // Returns one talent
 exports.get_talent = (req, res, next) => {
@@ -27,7 +30,7 @@ exports.post_talent = [
     .trim()
     .isLength({ min: 1 })
     .escape(),
-  body('parent', 'Talent parent cannot be empty')
+  body('talent', 'Main talent cannot be empty')
     .trim()
     .isLength({ min: 1 })
     .escape(),
@@ -70,7 +73,7 @@ exports.post_talent = [
 
     Talent.findOne({
       name: req.body.name,
-      parent: req.body.parent,
+      talent: req.body.talent,
       priority: req.body.priority,
       measurements: req.body.measurements,
       castTime: req.body.castTime,
@@ -84,6 +87,7 @@ exports.post_talent = [
         if (!replica) {
           const talent = new Talent({
             name: req.body.name,
+            talent: req.body.talent,
             parent: req.body.parent,
             priority: req.body.priority,
             measurements: req.body.measurements,
@@ -108,7 +112,7 @@ exports.post_update_talent = [
     .trim()
     .isLength({ min: 1 })
     .escape(),
-  body('parent', 'Talent parent cannot be empty')
+  body('talent', 'Main talent cannot be empty')
     .trim()
     .isLength({ min: 1 })
     .escape(),
@@ -119,7 +123,7 @@ exports.post_update_talent = [
   body('measurements.*', 'Talent measurements cannot be empty')
     .trim()
     .isLength({ min: 3 })
-    .withMessage('Must be atleast 3 chaacters long')
+    .withMessage('Must be atleast 3 characters long')
     .escape(),
   body('castTime', 'Talent cast time must be a positive number')
     .trim()
@@ -154,6 +158,7 @@ exports.post_update_talent = [
 
     Talent.findOne({
       name: req.body.name,
+      talent: req.body.talent,
       parent: req.body.parent,
       priority: req.body.priority,
       measurements: req.body.measurements,
@@ -168,6 +173,7 @@ exports.post_update_talent = [
         if (!replica) {
           const data = {
             name: req.body.name,
+            talent: req.body.talent,
             parent: req.body.parent,
             priority: req.body.priority,
             measurements: req.body.measurements,
@@ -186,18 +192,23 @@ exports.post_update_talent = [
   },
 ];
 
-// Deletes a talent from datatbase if no charcater is referencing it
+// Deletes a talent from database if no talent is referencing it
 exports.delete_talent = (req, res, next) => {
-  Character.findOne({ talents: req.params.id })
-    .exec((err, char) => {
-      if (err) return res.status(404).json({ err, msg: 'Error retrieving character' });
-      if (!char) {
-        Talent.findByIdAndDelete(req.params.id, (err) => {
-          if (err) return res.status(404).json({ msg: 'Failed removing talent' });
-          return res.json({ msg: 'Succesfully removed talent' });
-        });
-      } else {
-        return res.json({ char, msg: 'There are still characetes with the talent' });
-      }
-    });
+  async.parallel({
+    character(callback) {
+      Character.find({ talents: req.params.id })
+        .exec(callback);
+    },
+    enchant(callback) {
+      Enchantment.find({ antiTalent: req.params.id })
+        .exec(callback);
+    },
+    talent(callback) {
+      Talent.find({ parent: req.params.id })
+        .exec(callback);
+    },
+  }, (err, results) => {
+    if (err) return res.status(404).json({ err, msg: 'Error retrieving results' });
+    return handleDeletion(results, 'Talent', res, req.params.id);
+  });
 };
